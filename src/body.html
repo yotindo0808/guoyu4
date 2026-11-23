@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<title>快樂學國語</title>
+
+
+
+</head>
+<body>
+<header class="bar" id="bar">
+  <div class="row">
+    <h1>快樂學國語</h1>
+    <span class="ver" title="康軒版 115 學年度 第 7 冊（四年級上學期）">KH115-7</span>
+    <select id="lesson" aria-label="選擇課次"></select>
+    <button type="button" id="mset" aria-expanded="false">設定</button>
+    <a id="tback" class="tmgr" href="#">回到上課</a>
+    <nav class="tabs" id="tabs" aria-label="課程內容"></nav>
+    <span class="grow"></span>
+    <span id="clsbadge" class="clsbadge mset" hidden title="目前的班級"></span>
+    <label class="who mset" for="who">👤 <input id="who" type="text" placeholder="例：王小明" autocomplete="off"></label>
+    <a class="tmgr mset" href="#teacher">教師管理</a>
+    <span class="seg mset modeseg" role="group" aria-label="使用模式">
+      <button type="button" id="m-proj" aria-pressed="true">投影上課</button>
+      <button type="button" id="m-stu" aria-pressed="false" title="示範給學生看怎麼操作；學生自己用學生連結作答">學生練習示範</button>
+    </span>
+    <span class="seg mset tierseg" role="group" aria-label="示範哪一種練習" title="老師示範用：甲是標準層，乙是基礎層（學生畫面不會出現這個切換）">
+      <button type="button" id="d-a" aria-pressed="true">甲</button>
+      <button type="button" id="d-b" aria-pressed="false">乙</button>
+    </span>
+    <span class="seg mset" role="group" aria-label="注音">
+      <button type="button" id="z-on" aria-pressed="true">注音</button>
+      <button type="button" id="z-off" aria-pressed="false">無</button>
+    </span>
+    <span class="seg mset" role="group" aria-label="字級">
+      <button type="button" id="f-n" aria-pressed="true">字一般</button>
+      <button type="button" id="f-b" aria-pressed="false">放大</button>
+    </span>
+    <button type="button" class="tgl mset" id="snd" aria-pressed="true" title="答對答錯的提示音" aria-label="提示音">♪</button>
+  </div>
+</header>
+<main id="main"></main>
+<div id="result" role="dialog" aria-modal="true" aria-labelledby="rtitle"><div class="box" id="rbox"></div></div>
+<div id="printArea"></div>
+<div id="pop" role="dialog" aria-live="polite"><button type="button" class="btn x" id="popx">關閉</button><div id="popc"></div></div>
+
+
+
+
+
+</body>
+</html>
