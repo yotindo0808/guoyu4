@@ -128,3 +128,19 @@ DAMP = ('<rect x="40" y="8" width="80" height="100" fill="#d5dde4" stroke="#7d8f
         + '<line x1="70" y1="20" x2="76" y2="54" stroke="#555" stroke-width="2"/><line x1="90" y1="20" x2="84" y2="54" stroke="#555" stroke-width="2"/><circle cx="80" cy="64" r="15" fill="#e8b93c" stroke="#b88a12" stroke-width="2"/>'
         + '<path d="M54 64 h-10 M106 64 h10" stroke="#e0453a" stroke-width="3"/><polygon points="44,60 38,64 44,68" fill="#e0453a"/><polygon points="116,60 122,64 116,68" fill="#e0453a"/>')
 ART["bg2"] = svg(f'<g>{SWAY}</g><g transform="translate(176,0)">{DAMP}</g><path d="M164 60 h14" stroke="#555" stroke-width="3"/><polygon points="178,55 186,60 178,65" fill="#555"/>', vb="0 0 346 120", bg="#f3f6f8")
+# 生字教學卡圖解
+PERSON = lambda x, y, c="#e0703a", s=1: (f'<g transform="translate({x},{y}) scale({s})"><circle cx="0" cy="-30" r="7" fill="#f2c9a0"/>'
+                                          f'<rect x="-7" y="-22" width="14" height="20" rx="4" fill="{c}"/><rect x="-6" y="-3" width="5" height="16" fill="#4a5a6a"/><rect x="1" y="-3" width="5" height="16" fill="#4a5a6a"/></g>')
+ART["lookout"] = svg('<path d="M0 120 L0 56 L46 30 L70 44 L70 120 Z" fill="#8fbf7a"/>'
+                     + "".join(building(x, w, t, c) for x, w, t, c in [(84, 14, 78, "#9aa9b8"), (100, 12, 70, "#7d8fa3"), (114, 16, 84, "#a7b4c2"), (132, 12, 74, "#8b9cb0"), (146, 12, 88, "#9aa9b8")])
+                     + '<rect x="70" y="104" width="90" height="16" fill="#cfe3c2"/>' + PERSON(46, 30)
+                     + '<path d="M54 26 L90 64" stroke="#e0453a" stroke-width="2.5" stroke-dasharray="5 4"/><polygon points="92,68 84,64 90,58" fill="#e0453a"/>')
+ART["podium"] = svg('<rect x="0" y="100" width="160" height="20" fill="#d9c7a6"/><rect x="34" y="12" width="92" height="40" rx="3" fill="#3f6b55"/>'
+                    + PERSON(80, 84, "#e0703a", 1.15) + '<polygon points="80,28 83,36 92,36 85,41 88,50 80,44 72,50 75,41 68,36 77,36" fill="#ffcf3d"/>'
+                    + "".join(PERSON(x, 116, "#7fa6c9", .8) for x in (20, 44, 116, 140)))
+ART["coins"] = svg('<rect x="0" y="104" width="160" height="16" fill="#e8dcc4"/>'
+                   + "".join(f'<ellipse cx="{x}" cy="{104 - k * 8}" rx="14" ry="5" fill="#f2c14e" stroke="#c99a1c" stroke-width="1.5"/>' for x, n in [(34, 2), (66, 5), (98, 8), (130, 11)] for k in range(n))
+                   + '<path d="M22 84 L120 14" stroke="#e0453a" stroke-width="4" stroke-linecap="round"/><polygon points="126,10 112,12 120,24" fill="#e0453a"/>', bg="#fbf6e2")
+ART["phone"] = svg('<rect x="44" y="12" width="48" height="96" rx="8" fill="#3a4654"/><rect x="49" y="22" width="38" height="72" rx="3" fill="#bfe3f7"/><circle cx="68" cy="101" r="3" fill="#7d8fa3"/>'
+                   + "".join(f'<rect x="{104 + i * 10}" y="{80 - i * 14}" width="7" height="{14 + i * 14}" rx="2" fill="#4aa564"/>' for i in range(4))
+                   + '<path d="M56 50 q12 -12 24 0 M60 56 q8 -7 16 0" stroke="#3a7bd5" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="68" cy="62" r="3" fill="#3a7bd5"/>')

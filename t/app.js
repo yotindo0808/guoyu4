@@ -1375,14 +1375,18 @@ function mustSlides(c) {
   /* ③ 拼組部件 */
   const s3 = slide("", head("③ 拼出這個󠇡字"), assemble(c));
   /* ④ 描寫 */
+  const s4 = traceSlide(c, head("④ 照著寫寫看"));
+  /* ⑤ 看詞寫字 */
+  const s5 = wordWriteSlide(c, W[0], W[1], `看詞寫字：${c.c}`, head("⑤ 看詞寫字"));
+  return [s1, s2, s3, s4, s5];
+}
+function traceSlide(c, head) {
   const q4 = qid(`描寫：${c.c}`); const r4 = el("div");
   const p4 = inkPad({ ch: c.c, st: c.st, hints: true, onPick: (ch, h) => { const ok = ch === c.c; logAns(q4, ok, ch + (h ? `（用了${h}個提示）` : "")); if (ok) { p4.lock(); p4.res.innerHTML = '<span class="okmsg">√ 寫對了！</span>'; r4.classList.add("answered"); } else p4.res.innerHTML = `<span class="nomsg">這是「${nz(ch)}」，不󠇡是我們要寫的字。</span>擦掉再寫一󠇡次，可以按「提示」。`; } });
   const model = el("div", { class: "model" }, `<span class="mch nozy">${c.c}</span>`);
   const w4 = el("div", { class: "wrow" }); w4.append(model, p4); r4.append(w4);
-  const s4 = slide("", head("④ 照著寫寫看"), el("div", { class: "inst" }, "看左邊的字，在格子󠇡裡寫一󠇡次。需要時按「提示」。"), r4); s4.dataset.nofit = "1";
-  /* ⑤ 看詞寫字 */
-  const s5 = wordWriteSlide(c, W[0], W[1], `看詞寫字：${c.c}`, head("⑤ 看詞寫字"));
-  return [s1, s2, s3, s4, s5];
+  const s4 = slide("", head, el("div", { class: "inst" }, "看左邊的字，在格子󠇡裡寫一󠇡次。需要時按「提示」。"), r4); s4.dataset.nofit = "1";
+  return s4;
 }
 function wordWriteSlide(c, word, wh, label, head) {
   const q = qid(label); const r = el("div"); let got = false;
@@ -1560,19 +1564,57 @@ const VIEWS = {
     const T = tier(); const must = MUST();
     if (T === "proj") {
       const slides = L.cards.map(c => {
+        const N = (L.net || {})[c.c] || { bj: [], f: [], b: [] };
+        // ① 圖解＋彩色生字
         const left = el("div", { class: "cimg" });
+        if (L.cpic && L.cpic[c.c]) left.insertAdjacentHTML("beforeend", `<div class="cpic">${pic(L.cpic[c.c], "")}</div>`);
         const r1 = el("div", { class: "row" }); r1.append(c.img ? el("img", { src: c.img, alt: c.c + "（彩色部件）" }) : el("span", { class: "cglyph nozy" }, c.c), zyBox(c.cz)); left.append(r1);
         const rb = el("div", { class: "radb" }); const rbtn = el("button", { type: "button", "aria-label": "部首框，按一󠇡下顯示部首" }); rbtn.onclick = () => rbtn.textContent = rbtn.textContent ? "" : c.radb; rb.append(rbtn, "部");
-        const tr = el("button", { type: "button", class: "btn" }, "寫寫看"); tr.onclick = () => traceDialog(c);
-        const acts = el("div", { class: "row2" }); acts.append(sayBtn(() => `${c.c}，${[c.word, ...c.zc].join("，")}`, "唸生字和詞語"), tr);
-        left.append(rb, acts);
-        const right = el("div"); const chips = el("div", { class: "wchips" });
-        [c.word, ...c.zc].forEach((w, k) => { const d = el("div", { class: "wchip zyw" + (k ? " zc" : "") }); d.append(el("span", { class: "zyt" }, w), sayBtn(w, "唸這個󠇡詞")); chips.append(d); });
-        right.append(el("div", { class: "hint" }, "課文詞語與造詞"), chips);
-        if (must.has(c.c)) right.append(el("div", { class: "mustnote" }, "★"));
-        const g = el("div", { class: "cslide" }); g.append(left, right); return slide("", g);
+        left.append(rb, sayBtn(() => c.c, "唸這個󠇡字"));
+        if (must.has(c.c)) left.append(el("div", { class: "mustnote" }, "★"));
+        // ② 部件拆解
+        const right = el("div", { class: "cteach" });
+        const bjRow = el("div", { class: "bjrow" });
+        const bjBtn = el("button", { type: "button", class: "btn stepbtn", "aria-label": "拆一󠇢拆" }, "✂️");
+        const bjs = el("div", { class: "bjs", hidden: "" });
+        N.bj.forEach((t, k) => { if (k) bjs.append(el("span", { class: "plus" }, "＋")); const r = t.includes("*"); bjs.append(el("span", { class: "bj nozy" + (r ? " rad" : "") }, t.replace("*", ""))); });
+        bjBtn.onclick = () => { bjs.hidden = !bjs.hidden; };
+        bjRow.append(bjBtn, bjs);
+        // ③ 造詞網
+        const net = el("div", { class: "znet" });
+        const col = (list, side) => {
+          const d = el("div", { class: "zcol " + side });
+          d.append(el("div", { class: "zhead nozy" }, side === "f" ? `${c.c}＿` : `＿${c.c}`));
+          if (!list.length) d.append(el("div", { class: "zempty" }, "—"));
+          list.forEach(x => {
+            const card = el("button", { type: "button", class: "zcard" + (x.k ? " kw open" : "") + (x.n ? " chk" : ""), "aria-label": x.k ? x.w : "翻開詞語" });
+            const hint = el("span", { class: "zh" }); if (x.pic) hint.innerHTML = pic(x.pic, ""); else hint.textContent = x.e || "";
+            const word = el("span", { class: "zw" }, x.w);
+            card.append(hint, el("span", { class: "zx" }, "？"), word);
+            card.onclick = () => { card.classList.add("open"); if (HAS_TTS) { stopSpeak(); speak(plainText(x.w)); } };
+            d.append(card);
+          });
+          return d;
+        };
+        const mid = el("div", { class: "zmid nozy" }, c.c);
+        const fcol = col(N.f, "f"), bcol = col(N.b, "b");
+        net.append(fcol, mid, bcol);
+        const flipAll = el("button", { type: "button", class: "btn stepbtn", "aria-label": "全部翻開" }, "👀");
+        flipAll.onclick = () => net.querySelectorAll(".zcard").forEach(x => x.classList.add("open"));
+        // ④ 還能造什麼詞
+        const mine = el("div", { class: "zmine" });
+        const inp = el("input", { type: "text", class: "zin", "aria-label": "學生說的詞", maxlength: "6" });
+        const add = el("button", { type: "button", class: "btn", "aria-label": "加到造詞網" }, "➕");
+        const doAdd = () => { const w = inp.value.trim(); if (!w) return; if (!w.includes(c.c)) { inp.select(); return; }
+          const card = el("button", { type: "button", class: "zcard open mine" }); card.append(el("span", { class: "zh" }, "💡"), el("span", { class: "zw" }, w)); card.onclick = () => { if (HAS_TTS) { stopSpeak(); speak(w); } };
+          (w.startsWith(c.c) ? fcol : bcol).append(card); inp.value = ""; };
+        add.onclick = doAdd; inp.addEventListener("keydown", e => { if (e.key === "Enter") doAdd(); });
+        mine.append(el("span", { class: "zq" }, "💬"), inp, add);
+        right.append(bjRow, el("div", { class: "znetwrap" }, ""), mine);
+        right.querySelector(".znetwrap").append(net, flipAll);
+        const g = el("div", { class: "cslide teach" }); g.append(left, right); return slide("", g);
       });
-      return deck([{ name: "生字", hint: "按注音框顯示注音，按部首框顯示部首。", slides, dotChars: L.cards.map(c => c.c) }]);
+      return deck([{ name: "生字", hint: "看圖認字 → ✂️ 拆一󠇢拆 → 翻開造詞網 → 💬 還能造什麼詞？", slides, dotChars: L.cards.map(c => c.c) }]);
     }
     if (T === "base") {
       const ms = L.cards.filter(c => must.has(c.c)); const rest = L.cards.filter(c => !must.has(c.c));
@@ -1585,7 +1627,8 @@ const VIEWS = {
     const zc = L.cards.map(c => { const p = produce({ label: `自己造詞：${c.c}`, answer: c.zc.join("、"), hint: `想想生活中哪些詞有「${c.c}」`,
       check: t => !t.includes(c.c) ? { st: "no", msg: `要用到「${c.c}」這個󠇡字` } : (t === c.word ? { st: "no", msg: "這是課本的詞，換一󠇡個󠇡自己想的詞" } : (c.zc.includes(t) ? { st: "ok" } : { st: "check", msg: "老師會再確認這個󠇡詞" })) });
       return slide("", el("div", { class: "flash" }, `<span class="tag">自己造詞</span><div class="t nozy">${c.c}</div><div class="hint">課本的詞：${c.word}</div>`), el("div", { class: "hint", style: "text-align:center" }, `用「${c.c}」造一󠇡個󠇡課本以外的詞。`), p); });
-    return deck([{ group: "生字", name: "生字練習", hint: "每個󠇡生字要完成三件事：寫國字、拼注音、選部首。", slides: ps, dotChars: L.cards.map(c => c.c) }, { name: "自己造詞", slides: zc, dotChars: L.cards.map(c => c.c) }, { name: "完成", slides: [finishSlide()] }], { submit: true });
+    const tr = L.cards.map(c => traceSlide(c, el("div", { class: "mhead" }, '<span class="mstep">寫寫看</span>')));
+    return deck([{ group: "生字", name: "寫寫看", hint: "照著左邊的字寫一󠇡次，寫完會辨認你寫的字。", slides: tr, dotChars: L.cards.map(c => c.c) }, { name: "生字練習", hint: "每個󠇡生字要完成三件事：寫國字、拼注音、選部首。", slides: ps, dotChars: L.cards.map(c => c.c) }, { name: "自己造詞", slides: zc, dotChars: L.cards.map(c => c.c) }, { name: "完成", slides: [finishSlide()] }], { submit: true });
   },
 
   words() {

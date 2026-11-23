@@ -45,7 +45,7 @@ def seal(obj, key):
 # ── 字串處理：多音字加 IVS；代號、注音字串不處理 ──
 ID_RE = re.compile(r"^[a-z0-9_]+$")
 def is_zhuyin(s): return bool(s) and all(c in "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊˇˋ˙ˉ " for c in s)
-SKIP_KEYS = {"img", "pic", "pics", "imgs", "cz", "z", "d", "type", "seg", "st", "id"}
+SKIP_KEYS = {"e", "img", "pic", "pics", "imgs", "cz", "z", "d", "type", "seg", "st", "id"}
 def annotate(x, rules, key=None):
     if isinstance(x, str):
         if key in SKIP_KEYS or ID_RE.match(x) or is_zhuyin(x): return x
