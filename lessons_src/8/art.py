@@ -144,3 +144,32 @@ ART["coins"] = svg('<rect x="0" y="104" width="160" height="16" fill="#e8dcc4"/>
 ART["phone"] = svg('<rect x="44" y="12" width="48" height="96" rx="8" fill="#3a4654"/><rect x="49" y="22" width="38" height="72" rx="3" fill="#bfe3f7"/><circle cx="68" cy="101" r="3" fill="#7d8fa3"/>'
                    + "".join(f'<rect x="{104 + i * 10}" y="{80 - i * 14}" width="7" height="{14 + i * 14}" rx="2" fill="#4aa564"/>' for i in range(4))
                    + '<path d="M56 50 q12 -12 24 0 M60 56 q8 -7 16 0" stroke="#3a7bd5" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="68" cy="62" r="3" fill="#3a7bd5"/>')
+# 語詞教學卡插圖
+ART["slide"] = svg(GROUND + '<path d="M40 104 L40 30 M58 104 L58 30" stroke="#7d8fa3" stroke-width="4"/>'
+                   + "".join(f'<line x1="40" y1="{y}" x2="58" y2="{y}" stroke="#7d8fa3" stroke-width="3"/>' for y in (44, 58, 72, 86, 100))
+                   + '<rect x="36" y="26" width="30" height="6" fill="#e0703a"/><path d="M64 30 Q100 40 120 100 L132 100 Q112 34 66 22 Z" fill="#ffcf3d"/>'
+                   + PERSON(50, 20, "#4a90d9", .8) + '<path d="M58 6 L96 30" stroke="#e0453a" stroke-width="2" stroke-dasharray="4 3"/>'
+                   + "".join(PERSON(x, 116, "#9aa9b8", .55) for x in (110, 126, 142)))
+ART["greenlight"] = svg('<rect x="0" y="96" width="160" height="24" fill="#8d98a3"/>' + "".join(f'<rect x="{x}" y="100" width="10" height="16" fill="#fff"/>' for x in range(6, 160, 20))
+                        + '<rect x="70" y="40" width="6" height="56" fill="#555"/><rect x="58" y="6" width="30" height="40" rx="5" fill="#333"/><circle cx="73" cy="17" r="7" fill="#5a2a2a"/><circle cx="73" cy="35" r="7" fill="#3cd070"/>'
+                        + PERSON(118, 92, "#e0703a", .9))
+ART["queue"] = svg('<rect x="0" y="100" width="160" height="20" fill="#e8dcc4"/><rect x="6" y="20" width="34" height="80" fill="#c97a6d"/><rect x="12" y="44" width="22" height="56" fill="#8a5a33"/>'
+                   + "".join(PERSON(46 + k * 12, 100 - (k % 2) * 3, ["#4a90d9", "#e0703a", "#5aa469", "#9b6bd3"][k % 4], .75) for k in range(10)))
+ART["umbrellashop"] = svg('<rect x="0" y="100" width="160" height="20" fill="#8d98a3"/><rect x="10" y="30" width="70" height="70" fill="#f4e3c3"/><rect x="6" y="22" width="78" height="12" fill="#4a90d9"/>'
+                          + "".join(f'<path d="M{x} 70 q10 -16 20 0 z" fill="{c}"/><line x1="{x + 10}" y1="62" x2="{x + 10}" y2="86" stroke="#555" stroke-width="2"/>' for x, c in [(16, "#e0453a"), (40, "#ffcf3d"), (60, "#5aa469")])
+                          + "".join(f'<line x1="{x}" y1="{y}" x2="{x - 3}" y2="{y + 8}" stroke="#4a90d9" stroke-width="2"/>' for x, y in [(96, 10), (120, 24), (144, 8), (108, 44), (136, 50), (150, 30)])
+                          + "".join(PERSON(x, 104, "#7fa6c9", .75) for x in (96, 112, 128, 144)))
+ART["silhouette"] = svg('<rect width="160" height="120" fill="#f5b86b"/><circle cx="120" cy="70" r="22" fill="#ffe29a"/><rect x="0" y="92" width="160" height="28" fill="#c9824a"/>'
+                        + '<g fill="#2a1d14"><circle cx="50" cy="44" r="8"/><rect x="42" y="52" width="16" height="26" rx="5"/><rect x="43" y="76" width="6" height="18"/><rect x="51" y="76" width="6" height="18"/>'
+                        + '<ellipse cx="80" cy="84" rx="12" ry="6"/><circle cx="92" cy="78" r="5"/><rect x="72" y="88" width="3" height="6"/><rect x="85" y="88" width="3" height="6"/><path d="M68 82 l-6 -6" stroke="#2a1d14" stroke-width="3"/></g>', bg=None)
+ART["magician"] = svg('<rect x="0" y="0" width="160" height="70" fill="#7a2f3f"/><rect x="20" y="62" width="120" height="14" fill="#c9824a"/>'
+                      + PERSON(80, 62, "#333", 1.1) + '<rect x="70" y="16" width="20" height="10" fill="#222"/><rect x="66" y="25" width="28" height="3" fill="#222"/><line x1="92" y1="40" x2="106" y2="28" stroke="#222" stroke-width="3"/>'
+                      + "".join(f'<circle cx="{x}" cy="{y}" r="2.5" fill="#ffe29a"/>' for x, y in [(108, 22), (114, 30), (104, 16)])
+                      + "".join(f'<circle cx="{x}" cy="100" r="9" fill="#3a4654"/>' for x in range(14, 160, 22)) + '<rect x="0" y="108" width="160" height="12" fill="#3a4654"/>', bg="#eef0f4")
+ART["dragonboat"] = svg('<rect x="0" y="70" width="160" height="50" fill="#5cb6e0"/><path d="M14 70 Q80 90 146 70 L140 78 Q80 96 20 78 Z" fill="#e0453a"/>'
+                        + '<path d="M146 70 q10 -14 2 -22 q-6 6 -10 18 z" fill="#5aa469"/><circle cx="148" cy="52" r="2" fill="#222"/>'
+                        + "".join(PERSON(x, 74, "#ffcf3d", .6) for x in (40, 60, 80, 100, 120))
+                        + '<polygon points="24,20 44,20 34,40" fill="#6cb86b"/><polygon points="26,24 42,24 34,36" fill="#a8d08d"/><line x1="24" y1="24" x2="44" y2="34" stroke="#8a5a33" stroke-width="2"/>')
+ART["villagers"] = svg(GROUND + '<polygon points="96,40 140,40 150,56 86,56" fill="#a0522d"/><rect x="92" y="56" width="52" height="48" fill="#f4e3c3"/><rect x="110" y="72" width="16" height="32" fill="#8a5a33"/>'
+                       + PERSON(36, 104, "#5aa469") + PERSON(56, 104, "#c97a6d") + '<path d="M44 76 q6 -10 12 -4" stroke="#e0453a" stroke-width="2" fill="none"/>'
+                       + PERSON(80, 104, "#4a90d9", .9) + '<path d="M26 70 l-8 -8 M66 70 l8 -8" stroke="#f2c9a0" stroke-width="4" stroke-linecap="round"/>')

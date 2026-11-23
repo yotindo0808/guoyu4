@@ -1,7 +1,7 @@
 
 /* 版面構想：上方一列工具（課次、分頁、模式、注音、字級），下方一次只顯示一張卡片，用按鈕或左右鍵切換，盡量不必上下滑動 */
 /* 全站芫荽體：介面文字另存一份小字型；各課的芫荽體（--lf）與注音芫荽體（--zf）依課次子集，進入哪一課才載入 */
-@font-face { font-family: "IansuiUI"; src: url(fonts/ui.woff2?v=83cfb260) format("woff2"); font-display: block; }
+@font-face { font-family: "IansuiUI"; src: url(fonts/ui.woff2?v=a2656774) format("woff2"); font-display: block; }
 :root {
   --bg: #f4f1ea;            /* 米白紙色 */
   --paper: #fffdf8;
@@ -1107,6 +1107,81 @@ html.proj .cslide.teach .cpic .pic, .cslide.teach .cpic .pic { width: 100%; bord
 .zcard, .zmid, .bj, .zin { color: #1f2a28; }
 .cslide.teach { grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); }
 .cpic { max-width: 300px; }
+
+/* ── 第二版：生字卡版面、造詞網（上下兩列）、語詞教學卡、字族 ── */
+.cslide.teach { grid-template-columns: auto minmax(0, 1fr); }
+.cslide.teach .cimg { justify-items: center; }
+html.proj .cslide.teach .cimg .row img { width: 140px; }
+.cslide.teach .cimg { gap: 8px; }
+.cimg .bjs { gap: 4px; justify-content: center; max-width: 230px; }
+.cimg .bjs .bj { font-size: 1.3em; padding: 0 10px; }
+.cimg .row2 { display: flex; gap: 10px; align-items: center; }
+.zxjump { font-size: 24px; padding: 4px 12px; }
+.cteach { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 12px; }
+.cslide.teach { align-items: start; }
+.znet { display: grid; gap: 14px; align-content: center; grid-template-columns: none; }
+.zrow { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 12px; align-items: center; }
+.zrow[hidden] { display: none; }
+.zpat { font-family: var(--lf), var(--cjk); font-size: 1.5em; color: var(--muted); text-align: center; letter-spacing: .05em; }
+.zpat .tc, .zw .tc { color: #d4561c; font-weight: inherit; }
+html.proj .zpat { color: #cfd8d6; }
+html.proj .zpat .tc { color: #ffb37a; }
+.zcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.zcard { min-height: 76px; }
+.zcard .zw { font-size: 1.65em; }
+.zcard .zh .pic { width: 72px; height: 54px; }
+.zmine .sp { flex: 1; }
+.zin.bad { border-color: #e0453a; background: #fdecea; }
+.zhw .ipad { margin: 0; }
+.zhw[hidden] { display: none; }
+.zhw { background: var(--paper); border: 2px solid var(--line); border-radius: 14px; padding: 10px; color: #1f2a28; }
+.backbtn { position: fixed; right: 18px; top: 98px; z-index: 30; font-size: 22px; padding: 8px 18px; }
+/* 語詞教學卡 */
+.wteach { display: grid; grid-template-columns: minmax(260px, 38%) minmax(0, 1fr); gap: 28px; align-items: start; }
+.wpics { display: grid; gap: 10px; }
+.wpics .pic { width: 100%; height: auto; border-radius: 12px; border: 2px solid var(--line); display: block; }
+.wbody { display: grid; gap: 14px; align-content: start; }
+.whead { display: flex; align-items: center; gap: 10px; }
+.wword { font-family: var(--zf), var(--cjk); font-size: 2.4em; letter-spacing: .1em; color: var(--accent); }
+.wrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.wrow .wi { font-size: 1.4em; }
+.wrow .fpk { text-align: left; }
+.wex { line-height: 2; }
+.wex .kw { color: #d4561c; }
+html.proj .wex .kw { color: #ffb37a; }
+.wqs { display: grid; gap: 8px; border-top: 2px dashed var(--line); padding-top: 10px; }
+/* 字族 */
+.fam { display: grid; justify-items: center; gap: 18px; }
+.famc { font-family: var(--lf), var(--cjk); font-size: 3em; width: 1.6em; height: 1.6em; display: grid; place-items: center; border-radius: 50%; background: #ffe8a8; border: 3px solid #e0b400; color: #1f2a28; }
+.famg { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; width: 100%; }
+.famk { display: grid; grid-template-columns: auto auto 1fr; grid-template-rows: auto auto; align-items: center; gap: 4px 10px; padding: 10px 14px; border: 2px dashed #b9c3c0; border-radius: 14px; background: #f7f9f8; color: #1f2a28; font: inherit; text-align: left; }
+.famk .ff { font-family: var(--lf), var(--cjk); font-size: 1.4em; }
+.famk .fr { color: #d4561c; font-weight: inherit; }
+.famk .fch { font-family: var(--lf), var(--cjk); font-size: 2.6em; line-height: 1; }
+.famk .fq { font-size: 2em; color: #9aa6a3; }
+.famk .fm { grid-column: 1 / -1; color: #5a6a66; font-family: var(--ui); }
+.famk:not(.open) .fch, .famk:not(.open) .fm, .famk.open .fq { display: none; }
+.famk.open { border-style: solid; background: #eef6f4; }
+.famk.from { background: #fff4d6; border-color: #e0b400; }
+.poem { display: grid; gap: 6px; justify-items: center; font-family: var(--zf), var(--cjk); font-size: 1.9em; line-height: 1.9; }
+.poem .pz { display: inline-block; padding: 0 2px; border-radius: 50%; border: 3px solid transparent; }
+.poem .pz.fm { cursor: pointer; }
+.poem .pz.circ { border-color: #e0453a; }
+.cmp { display: flex; justify-content: center; gap: 60px; }
+.cmpk { display: grid; justify-items: center; gap: 8px; }
+.cmpk .cch { font-family: var(--lf), var(--cjk); font-size: 5em; line-height: 1.1; }
+.cmpk .cf { font-family: var(--lf), var(--cjk); font-size: 1.8em; }
+.cmpk .diff { color: #e0453a; font-weight: inherit; }
+.cmpk .cws { font-family: var(--zf), var(--cjk); font-size: 1.4em; }
+.wpics.two .pic { max-height: 245px; object-fit: contain; background: #eef6fb; }
+.poem .pline { white-space: nowrap; }
+.cteach { position: relative; }
+.zhw { position: absolute; right: 0; bottom: 70px; z-index: 6; box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+.zhw .ipad { display: grid; grid-template-columns: auto 260px; grid-template-rows: auto 1fr auto; column-gap: 14px; align-items: start; }
+.zhw .ipad canvas { grid-row: 1 / span 3; }
+.zcard .zw { white-space: nowrap; }
+.zcards { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.zcard .zh .pic { width: 60px; height: 45px; }
 
 
 .lockp{display:block;padding:14px 18px;border:2px dashed #c9b28a;border-radius:12px;background:#fffaf0;color:#6b5a3a;line-height:1.8}
