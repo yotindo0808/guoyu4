@@ -183,6 +183,19 @@ function backBtn() {
   return b;
 }
 
+/* ── 照樣寫：每個空格有詞庫，點詞放進空格，也可以自己打 ── */
+function phraseSlide(p, i) {
+  const w = writeBox(`照樣寫${i + 1}`); const ta = w.querySelector("textarea");
+  const line = el("div", { class: "stem big-line" }); const blanks = [];
+  p.stem.forEach(x => { if (x === 0) { const b = el("span", { class: "pblank" }, "〔　〕"); blanks.push(b); line.append(b); } else line.append(x); });
+  const banks = el("div", { class: "pbanks" });
+  (p.banks || []).forEach((bk, k) => { const r = el("div", { class: "pbrow" }); r.append(el("span", { class: "pbn" }, "〔" + (k + 1) + "〕"));
+    bk.forEach(t => { const c = el("button", { type: "button", class: "chip" }, t); c.onclick = () => { const b = blanks[k]; if (!b) return; b.dataset.v = t; b.textContent = t; b.classList.add("on");
+      let n = 0; if (blanks.every(x => x.dataset.v)) { ta.value = p.stem.map(x => x === 0 ? blanks[n++].dataset.v : x).join(""); ta.onchange(); } }; r.append(c); });
+    banks.append(r); });
+  return slide("", kick(p.pat), el("div", { class: "stem big-line" }, `課文：${p.orig}`), p.hint ? el("div", { class: "inst" }, "💡 " + p.hint) : null, line, banks, el("div", { class: "inst" }, "也可以自己寫："), w, refBox(esc(p.ref)));
+}
+
 /* ── 字音字形教學：以字帶字、字族文、比一比 ── */
 const GR = t => String(t).match(/.[\u{E0100}-\u{E01EF}]?/gu) || [];
 function famSlide(F) {
@@ -338,8 +351,7 @@ function lessonHead() { return el("div", { class: "lhead" }, `<span class="ltitl
 /* ── 投影：背景知識卡、提問卡 ── */
 function bgSlide(b) {
   const qs = el("div", { class: "pq" });
-  b.qb.forEach(t => qs.append(el("div", { class: "pqi" }, ICON_B + `<span>${t}</span>`)));
-  b.qs.forEach(t => qs.append(el("div", { class: "pqi" }, ICON_S + `<span>${t}</span>`)));
+  (b.q || []).forEach((t, i) => qs.append(el("div", { class: "pqi" }, `<span class="qn">${"①②③④⑤⑥"[i]}</span><span>${t}</span>`)));
   const left = el("div", { class: "bgimg" }, pic(b.img, b.title)); const right = el("div");
   right.append(el("div", { class: "bgtext" }, b.text), sayBtn(() => plainText(b.text), "唸卡片"), qs);
   return slide("", kick("背景知識"), el("h2", { class: "bgt" }, b.title), splitBox([left], [right]));
@@ -384,7 +396,7 @@ const VIEWS = {
     const T = tier(); const n = (L.text || []).length || 5;
     if (T === "proj") {
       const secs = [
-        { name: "背景知識", hint: "先用圖片和生活經驗想一想，再讀課文。", slides: L.bg.map(bgSlide), extra: iconLegend() },
+        { name: "背景知識", hint: "先用圖片和生活經驗想一想，再讀課文。", slides: L.bg.map(bgSlide) },
         { name: "分段讀", hint: "畫底線的是詞語，按一下看意思；黃色底的字是本課生字。", slides: [...Array(n).keys()].map(i => paraSlide(i)) },
         { name: "課文結構", slides: structSlides() },
         { name: "三座建築比一比", hint: "按一下格子，顯示答案。", slides: [towerSlide()] },
@@ -438,15 +450,9 @@ const VIEWS = {
         /* 右：造詞網（字在前一列、字在後一列），最下面加自己想的詞 */
         const right = el("div", { class: "cteach" });
         const net = el("div", { class: "znet" });
-        const row = (list, pat) => {
-          const r = el("div", { class: "zrow" }); r.append(el("div", { class: "zpat nozy" }, pat.replace(c.c, `<b class="tc">${c.c}</b>`)));
-          const cards = el("div", { class: "zcards" }); r.append(cards); r.cards = cards;
-          list.forEach(x => cards.append(zcard(x, c.c)));
-          return r;
-        };
-        const rf = row(N.f, `${c.c}＿`), rbk = row(N.b, `＿${c.c}`);
-        if (!N.f.length) rf.hidden = true;
-        net.append(rf, rbk);
+        const cards = el("div", { class: "zcards" });
+        [...N.f, ...N.b].forEach(x => cards.append(zcard(x, c.c)));
+        net.append(cards);
         const flipAll = el("button", { type: "button", class: "btn stepbtn", "aria-label": "全部翻開", title: "全部翻開" }, "👀");
         flipAll.onclick = () => net.querySelectorAll(".zcard").forEach(x => x.classList.add("open"));
         const mine = el("div", { class: "zmine" });
@@ -457,12 +463,12 @@ const VIEWS = {
         let pad = null;
         hw.onclick = () => { hwBox.hidden = !hwBox.hidden; if (!hwBox.hidden && !pad) { pad = inkPad({ hints: false, onPick: ch => { inp.value += ch; pad.reset(); } }); hwBox.append(pad); } };
         const doAdd = () => { const w = inp.value.trim(); if (!w) return; if (!w.includes(c.c)) { inp.classList.add("bad"); setTimeout(() => inp.classList.remove("bad"), 900); return; }
-          const tgt = w.startsWith(c.c) ? rf : rbk; tgt.hidden = false; tgt.cards.append(zcard({ w, e: "💡", mine: 1 }, c.c, true)); inp.value = ""; };
+          cards.append(zcard({ w, e: "💡", mine: 1 }, c.c, true)); inp.value = ""; };
         add.onclick = doAdd; inp.addEventListener("keydown", e => { if (e.key === "Enter") doAdd(); });
         const clr = el("button", { type: "button", class: "btn stepbtn", "aria-label": "清除", title: "清除" }, "⌫"); clr.onclick = () => { inp.value = inp.value.slice(0, -1); };
         mine.append(el("span", { class: "zq" }, "💬"), inp, clr, hw, add, el("span", { class: "sp" }, ""), flipAll);
         right.append(net, mine, hwBox);
-        const g = el("div", { class: "cslide teach" }); g.append(left, right); return slide("", g);
+        const g = el("div", { class: "cslide teach" }); g.append(left, right); const sl = slide("", g); sl.dataset.nofit = "1"; return sl;
       });
       return deck([{ name: "生字", hint: "✂️ 拆一拆 → 翻開詞卡 → 💬 還能造什麼詞？（🔗 到字音字形）", slides, dotChars: L.cards.map(c => c.c) }]);
     }
@@ -496,16 +502,20 @@ const VIEWS = {
         right.append(hd);
         const dr = el("div", { class: "wrow" }); dr.append(el("span", { class: "wi", title: "意思" }, "📖"), peekBox(w.def, "def"), sayBtn(() => plainText(w.def), "唸意思")); right.append(dr);
         (t.ex || []).forEach(x => { const r = el("div", { class: "wrow ex" }); r.append(el("span", { class: "wi", title: "例句" }, "✏️"), el("span", { class: "wex" }, x.split(w.w).join(`<b class="kw">${w.w}</b>`)), sayBtn(() => plainText(x), "唸例句")); right.append(r); });
-        if (t.qb || t.qs) { const q = el("div", { class: "wqs" }); if (t.qb) q.append(el("div", { class: "pqi" }, ICON_B + `<span>${t.qb}</span>`)); if (t.qs) q.append(el("div", { class: "pqi" }, ICON_S + `<span>${t.qs}</span>`)); right.append(q); }
+        if (t.qb || t.qs) { const q = el("div", { class: "wqs pq" }); [t.qb, t.qs].filter(Boolean).forEach((x, i) => q.append(el("div", { class: "pqi" }, `<span class="qn">${"①②"[i]}</span><span>${x}</span>`))); right.append(q); }
         g.append(pics, right); return slide("", g);
       });
       const demo = L.judge.filter(x => x.w === "居高臨下").map((x, i) => ynSlide(x.s.replace(x.w, `<b class="kw">${x.w}</b>`), x.ok, `一起想想看${i + 1}`));
       return deck([{ name: "語詞", hint: "看圖說說看 → 📖 猜意思再打開 → ✏️ 讀例句 → 回答提問", slides: cards }, { name: "一起想想看", hint: "詞語用得對不對？說說你的理由。", slides: demo }]);
     }
     if (T === "base") {
-      const kwPics = L.kw.map((x, i) => { const o = shuffle(L.kw.filter(y => y !== x)).slice(0, 2); return listenSlide(x[0], [x, ...o], 0, `聽詞選圖：${x[0]}`, { html: y => pic(y[1], y[0]), cls: "lpic", hint: "聽一聽，按出對的圖。" }); });
+      const ws = L.wsel || [];
+      const hear = ws.map(o => listenSlide(o[0], o, 0, `聽詞選詞：${o[0]}`, { cls: "lword", hint: "聽一聽，按出對的詞語。" }));
+      const look = L.kw.map(x => { const o = shuffle(L.kw.filter(y => y !== x)).slice(0, 2).map(y => y[0]);
+        const st = el("div", { class: "bigpic" }); st.innerHTML = pic(x[1], "");
+        return listenSlide("看圖，選出對的詞語。", [x[0], ...o], 0, `看圖選詞：${x[0]}`, { stem: st, cls: "lword", hint: "看圖，按出對的詞語。" }); });
       const sent = L.listen.map((x, i) => picSlide(x.t.replace(/\{[^}]*\}/, "（　）"), x.opts.map(w => [w, (L.kw.find(k => k[0] === w) || [])[1]]), 0, `聽句子選詞${i + 1}`, { auto: true, say: blankless(x.t) }));
-      return deck([{ name: "聽詞選圖", hint: "聽詞語，選出對的圖。", slides: kwPics }, { name: "聽句子選詞", hint: "聽句子，選出空格裡的詞。", slides: sent }, { name: "完成", slides: [finishSlide()] }], { submit: true });
+      return deck([{ name: "聽詞選詞", hint: "聽詞語，選出對的詞語。", slides: hear }, { name: "看圖選詞", hint: "看圖，選出對的詞語。", slides: look }, { name: "聽句子選詞", hint: "聽句子，選出空格裡的詞。", slides: sent }, { name: "完成", slides: [finishSlide()] }], { submit: true });
     }
     const defS = defBankSlides(WD.filter(w => !/^\s*$/.test(w.def)).map(w => ({ t: w.w, h: w.w, def: w.def.replace(/^①/, "").replace(/②.*$/, "") })), { label: "詞義", per: 5 });
     return deck([{ name: "詞義", hint: "看解釋，選出詞語。", slides: defS }, { name: "情境判斷", hint: "看句子，判斷詞語用得對不對。", slides: judgeS }, { name: `「${L.multi.w}」的意思`, hint: "判斷句子裡的意思是 ① 還是 ②。", slides: multiS }, { name: "選詞填入", hint: "先按空格，再按詞語。", slides: fillS }, { name: "完成", slides: [finishSlide()] }], { submit: true });
@@ -574,7 +584,7 @@ const VIEWS = {
       const w3 = writeBox("不但……更……：自己造句"); const c3 = el("div", { class: "selfck only-stu" }); c3.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["有用到「不但」和「更」", "「更」後面比前面更進一步", "有標點符號"]));
       const bd3 = slide("", kick("自己造句"), el("div", { class: "stem" }, "用「不但……更……」自己造一句。"), w3, c3, refBox(esc(B.ownRef)));
       secs.push({ name: "不但……更……", slides: [bd1, bd2, bd3], seq: true });
-      secs.push({ name: "照樣寫", hint: "照著課文的句子，換上自己的詞。", slides: L.phrase.map((p, i) => { const w = writeBox(`照樣寫${i + 1}`); return slide("", kick(p.pat), el("div", { class: "stem big-line" }, `課文：${p.orig}`), el("div", { class: "stem big-line" }, p.stem.map(x => x === 0 ? "〔　〕" : x).join("")), w, refBox(esc(p.ref))); }) });
+      secs.push({ name: "照樣寫", hint: "照著課文的句子，換上自己的詞。", slides: L.phrase.map((p, i) => phraseSlide(p, i)) });
     }
     if (T !== "proj") secs.push({ name: "完成", slides: [finishSlide()] });
     return deck(secs, { submit: T !== "proj" });

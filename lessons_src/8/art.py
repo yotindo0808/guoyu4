@@ -173,3 +173,7 @@ ART["dragonboat"] = svg('<rect x="0" y="70" width="160" height="50" fill="#5cb6e
 ART["villagers"] = svg(GROUND + '<polygon points="96,40 140,40 150,56 86,56" fill="#a0522d"/><rect x="92" y="56" width="52" height="48" fill="#f4e3c3"/><rect x="110" y="72" width="16" height="32" fill="#8a5a33"/>'
                        + PERSON(36, 104, "#5aa469") + PERSON(56, 104, "#c97a6d") + '<path d="M44 76 q6 -10 12 -4" stroke="#e0453a" stroke-width="2" fill="none"/>'
                        + PERSON(80, 104, "#4a90d9", .9) + '<path d="M26 70 l-8 -8 M66 70 l8 -8" stroke="#f2c9a0" stroke-width="4" stroke-linecap="round"/>')
+ART["gucoin"] = svg('<circle cx="80" cy="60" r="44" fill="#e8b93a" stroke="#b8860b" stroke-width="4"/><circle cx="80" cy="60" r="34" fill="none" stroke="#b8860b" stroke-width="2"/>'
+                    + '<rect x="66" y="46" width="28" height="28" fill="#fff8e1" stroke="#b8860b" stroke-width="3"/>', bg="#fff8e1")
+ART["heart"] = svg('<path d="M80 100 C30 70 30 28 58 26 C70 25 78 34 80 40 C82 34 90 25 102 26 C130 28 130 70 80 100 Z" fill="#e8546a"/>', bg="#fdeef0")
+ART["star"] = svg('<polygon points="80,14 92,46 126,48 99,68 108,102 80,82 52,102 61,68 34,48 68,46" fill="#ffcf3d" stroke="#e0a800" stroke-width="3"/>', bg="#eef3fb")

@@ -1182,6 +1182,29 @@ html.proj .wex .kw { color: #ffb37a; }
 .zcard .zw { white-space: nowrap; }
 .zcards { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
 .zcard .zh .pic { width: 60px; height: 45px; }
+.pblank { display: inline-block; min-width: 3em; text-align: center; border-bottom: 3px solid var(--accent); margin: 0 .15em; }
+.pblank.on { color: #d4561c; }
+.pbanks { display: grid; gap: 8px; margin: .4em 0; }
+.pbrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pbn { color: var(--muted); font-family: var(--ui); }
+.pq .qn { font-size: 1.2em; color: var(--accent); margin-right: .3em; }
+.lopt.lword { font-family: var(--zf), var(--cjk); font-size: 2em; min-width: 5em; }
+.bigpic .pic { width: min(360px, 40vw); height: auto; border-radius: 14px; display: block; margin: 0 auto; }
+.zcards { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.zcard .zw { font-size: 1.45em; }
+.zcard .zh { width: 1.7em; }
+.lq .bigpic, .bigpic { display: flex; justify-content: center; }
+.bigpic .pic { width: min(380px, 42vw); }
+.zcard .zw { font-size: 1.25em; }
+.cslide.teach .zcard { min-height: 96px; }
+.cslide.teach .zcard .zw { font-size: 2.1em; }
+.cslide.teach .zcard .zx { font-size: 2em; }
+.cslide.teach .zcard .zh { font-size: 2em; width: 1.6em; }
+.cslide.teach .zcard .zh .pic { width: 70px; height: 52px; }
+.cslide.teach .zcards { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+html.proj .cslide.teach .cimg .row img { width: 170px; }
+.cslide.teach .zin { font-size: 1.8em; width: 6em; }
+.cslide.teach .zmine .zq { font-size: 2em; }
 
 
 .lockp{display:block;padding:14px 18px;border:2px dashed #c9b28a;border-radius:12px;background:#fffaf0;color:#6b5a3a;line-height:1.8}
