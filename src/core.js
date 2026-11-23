@@ -35,6 +35,8 @@ function ensureLesson(id) {
     const [d] = await Promise.all([fetch(`${LBASE}${id}/data.json?v=${meta.v}`).then(r => r.json()), lessonFonts(id, meta)]);
     d.v = meta.v; LESSONS[id] = d; await onLessonLoaded(id);
     window.LOADMS = window.LOADMS || {}; window.LOADMS[id] = Math.round(performance.now() - t0);
+    /* 網址加 ?perf 顯示載入時間（檢查學生平板第一次開啟與切換課次用） */
+    if (/[?&]perf\b/.test(location.search)) setTimeout(() => toast(`開網頁到可以用：${(performance.now() / 1000).toFixed(1)} 秒；載入${plainText((LIST.find(x => x[0] === id) || [, id])[1]).split(/\s+/)[0]}：${(window.LOADMS[id] / 1000).toFixed(1)} 秒`), 300);
     return d;
   })().finally(() => { delete LOADING[id]; });
 }
