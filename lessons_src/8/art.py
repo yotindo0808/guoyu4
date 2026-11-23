@@ -129,14 +129,30 @@ DAMP = ('<rect x="40" y="8" width="80" height="100" fill="#d5dde4" stroke="#7d8f
         + '<path d="M54 64 h-10 M106 64 h10" stroke="#e0453a" stroke-width="3"/><polygon points="44,60 38,64 44,68" fill="#e0453a"/><polygon points="116,60 122,64 116,68" fill="#e0453a"/>')
 ART["bg2"] = svg(f'<g>{SWAY}</g><g transform="translate(176,0)">{DAMP}</g><path d="M164 60 h14" stroke="#555" stroke-width="3"/><polygon points="178,55 186,60 178,65" fill="#555"/>', vb="0 0 346 120", bg="#f3f6f8")
 # 生字教學卡圖解
-PERSON = lambda x, y, c="#e0703a", s=1: (f'<g transform="translate({x},{y}) scale({s})"><circle cx="0" cy="-30" r="7" fill="#f2c9a0"/>'
-                                          f'<rect x="-7" y="-22" width="14" height="20" rx="4" fill="{c}"/><rect x="-6" y="-3" width="5" height="16" fill="#4a5a6a"/><rect x="1" y="-3" width="5" height="16" fill="#4a5a6a"/></g>')
+HAIR = ["#3b2a20", "#5a3a22", "#2d2d2d", "#7a4a2a"]
+def PERSON(x, y, c="#e0703a", s=1, h=0, arms="down"):
+    """y 是腳底；高約 44。arms: down／up（舉手）／wave（一手舉起）"""
+    hair = HAIR[h % len(HAIR)]
+    la = '<path d="M-7 -20 Q-12 -12 -11 -5" stroke="{c}" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+    ra = '<path d="M7 -20 Q12 -12 11 -5" stroke="{c}" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+    if arms == "up": ra = '<path d="M7 -20 Q13 -28 12 -36" stroke="{c}" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+    if arms == "wave": la = '<path d="M-7 -20 Q-14 -27 -13 -34" stroke="{c}" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+    la, ra = la.format(c=c), ra.format(c=c)
+    return (f'<g transform="translate({x},{y + 13 * s:.1f}) scale({s})">'
+            f'<rect x="-6" y="-8" width="5" height="8" rx="2" fill="#3e4c5e"/><rect x="1" y="-8" width="5" height="8" rx="2" fill="#3e4c5e"/>'
+            f'<ellipse cx="-3.5" cy="0" rx="3.5" ry="1.6" fill="#333"/><ellipse cx="3.5" cy="0" rx="3.5" ry="1.6" fill="#333"/>'
+            f'{la}{ra}<path d="M-8 -9 Q-8 -24 0 -24 Q8 -24 8 -9 Z" fill="{c}"/>'
+            f'<rect x="-1.8" y="-27" width="3.6" height="4" fill="#f2c9a0"/><circle cx="0" cy="-33" r="7.5" fill="#f6d2b0"/>'
+            f'<path d="M-7.6 -33 Q-8 -42 0 -41.5 Q8 -42 7.6 -33 Q4 -38 0 -37.5 Q-4 -38 -7.6 -33 Z" fill="{hair}"/>'
+            f'<circle cx="-2.6" cy="-32.5" r="0.9" fill="#333"/><circle cx="2.6" cy="-32.5" r="0.9" fill="#333"/>'
+            f'<path d="M-2.2 -29.6 Q0 -28 2.2 -29.6" stroke="#b5533c" stroke-width="0.9" fill="none" stroke-linecap="round"/>'
+            f'<circle cx="-4.6" cy="-30.4" r="1.3" fill="#f2a7a0" opacity=".6"/><circle cx="4.6" cy="-30.4" r="1.3" fill="#f2a7a0" opacity=".6"/></g>')
 ART["lookout"] = svg('<path d="M0 120 L0 56 L46 30 L70 44 L70 120 Z" fill="#8fbf7a"/>'
                      + "".join(building(x, w, t, c) for x, w, t, c in [(84, 14, 78, "#9aa9b8"), (100, 12, 70, "#7d8fa3"), (114, 16, 84, "#a7b4c2"), (132, 12, 74, "#8b9cb0"), (146, 12, 88, "#9aa9b8")])
                      + '<rect x="70" y="104" width="90" height="16" fill="#cfe3c2"/>' + PERSON(46, 30)
                      + '<path d="M54 26 L90 64" stroke="#e0453a" stroke-width="2.5" stroke-dasharray="5 4"/><polygon points="92,68 84,64 90,58" fill="#e0453a"/>')
 ART["podium"] = svg('<rect x="0" y="100" width="160" height="20" fill="#d9c7a6"/><rect x="34" y="12" width="92" height="40" rx="3" fill="#3f6b55"/>'
-                    + PERSON(80, 84, "#e0703a", 1.15) + '<polygon points="80,28 83,36 92,36 85,41 88,50 80,44 72,50 75,41 68,36 77,36" fill="#ffcf3d"/>'
+                    + PERSON(80, 84, "#e0703a", 1.2, 1, "wave") + '<polygon points="80,16 83,24 92,24 85,29 88,38 80,32 72,38 75,29 68,24 77,24" fill="#ffcf3d"/>'
                     + "".join(PERSON(x, 116, "#7fa6c9", .8) for x in (20, 44, 116, 140)))
 ART["coins"] = svg('<rect x="0" y="104" width="160" height="16" fill="#e8dcc4"/>'
                    + "".join(f'<ellipse cx="{x}" cy="{104 - k * 8}" rx="14" ry="5" fill="#f2c14e" stroke="#c99a1c" stroke-width="1.5"/>' for x, n in [(34, 2), (66, 5), (98, 8), (130, 11)] for k in range(n))
@@ -163,7 +179,7 @@ ART["silhouette"] = svg('<rect width="160" height="120" fill="#f5b86b"/><circle 
                         + '<g fill="#2a1d14"><circle cx="50" cy="44" r="8"/><rect x="42" y="52" width="16" height="26" rx="5"/><rect x="43" y="76" width="6" height="18"/><rect x="51" y="76" width="6" height="18"/>'
                         + '<ellipse cx="80" cy="84" rx="12" ry="6"/><circle cx="92" cy="78" r="5"/><rect x="72" y="88" width="3" height="6"/><rect x="85" y="88" width="3" height="6"/><path d="M68 82 l-6 -6" stroke="#2a1d14" stroke-width="3"/></g>', bg=None)
 ART["magician"] = svg('<rect x="0" y="0" width="160" height="70" fill="#7a2f3f"/><rect x="20" y="62" width="120" height="14" fill="#c9824a"/>'
-                      + PERSON(80, 62, "#333", 1.1) + '<rect x="70" y="16" width="20" height="10" fill="#222"/><rect x="66" y="25" width="28" height="3" fill="#222"/><line x1="92" y1="40" x2="106" y2="28" stroke="#222" stroke-width="3"/>'
+                      + PERSON(80, 62, "#333", 1.1, 2, "up") + '<rect x="71" y="22" width="18" height="11" rx="1" fill="#222"/><rect x="66" y="31" width="28" height="3" rx="1" fill="#222"/><rect x="71" y="29" width="18" height="2" fill="#c0392b"/><line x1="94" y1="44" x2="106" y2="30" stroke="#222" stroke-width="3" stroke-linecap="round"/><circle cx="106" cy="30" r="2" fill="#fff"/>'
                       + "".join(f'<circle cx="{x}" cy="{y}" r="2.5" fill="#ffe29a"/>' for x, y in [(108, 22), (114, 30), (104, 16)])
                       + "".join(f'<circle cx="{x}" cy="100" r="9" fill="#3a4654"/>' for x in range(14, 160, 22)) + '<rect x="0" y="108" width="160" height="12" fill="#3a4654"/>', bg="#eef0f4")
 ART["dragonboat"] = svg('<rect x="0" y="70" width="160" height="50" fill="#5cb6e0"/><path d="M14 70 Q80 90 146 70 L140 78 Q80 96 20 78 Z" fill="#e0453a"/>'
@@ -171,8 +187,8 @@ ART["dragonboat"] = svg('<rect x="0" y="70" width="160" height="50" fill="#5cb6e
                         + "".join(PERSON(x, 74, "#ffcf3d", .6) for x in (40, 60, 80, 100, 120))
                         + '<polygon points="24,20 44,20 34,40" fill="#6cb86b"/><polygon points="26,24 42,24 34,36" fill="#a8d08d"/><line x1="24" y1="24" x2="44" y2="34" stroke="#8a5a33" stroke-width="2"/>')
 ART["villagers"] = svg(GROUND + '<polygon points="96,40 140,40 150,56 86,56" fill="#a0522d"/><rect x="92" y="56" width="52" height="48" fill="#f4e3c3"/><rect x="110" y="72" width="16" height="32" fill="#8a5a33"/>'
-                       + PERSON(36, 104, "#5aa469") + PERSON(56, 104, "#c97a6d") + '<path d="M44 76 q6 -10 12 -4" stroke="#e0453a" stroke-width="2" fill="none"/>'
-                       + PERSON(80, 104, "#4a90d9", .9) + '<path d="M26 70 l-8 -8 M66 70 l8 -8" stroke="#f2c9a0" stroke-width="4" stroke-linecap="round"/>')
+                       + PERSON(30, 104, "#5aa469", 1.1, 2, "wave") + PERSON(54, 104, "#c97a6d", 1.1, 3, "up")
+                       + '<path d="M40 52 q4 -6 8 0 q4 -6 8 0 q0 6 -8 11 q-8 -5 -8 -11 z" fill="#e8546a"/>' + PERSON(78, 104, "#4a90d9", .85, 0))
 ART["gucoin"] = svg('<circle cx="80" cy="60" r="44" fill="#e8b93a" stroke="#b8860b" stroke-width="4"/><circle cx="80" cy="60" r="34" fill="none" stroke="#b8860b" stroke-width="2"/>'
                     + '<rect x="66" y="46" width="28" height="28" fill="#fff8e1" stroke="#b8860b" stroke-width="3"/>', bg="#fff8e1")
 ART["heart"] = svg('<path d="M80 100 C30 70 30 28 58 26 C70 25 78 34 80 40 C82 34 90 25 102 26 C130 28 130 70 80 100 Z" fill="#e8546a"/>', bg="#fdeef0")

@@ -402,7 +402,7 @@ async function hwRecognize(ink, w, h) {
   const res = await fetch(HW_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ options: "enable_pre_space", requests: [{ writing_guide: { writing_area_width: w, writing_area_height: h }, ink, language: "zh_TW" }] }) });
   const j = await res.json(); return (j[1] && j[1][0] && j[1][0][1]) || [];
 }
-function handwritePad(onPick) {
+function handwritePad(onPick, ho = {}) {
   const wrap = el("div", { class: "hwpad" });
   const size = Math.max(140, Math.min(220, Math.floor(innerHeight * .26)));
   const cv = el("canvas", { width: String(size * 2), height: String(size * 2), "aria-label": "手寫區" });
@@ -436,7 +436,7 @@ function handwritePad(onPick) {
   const ok = el("button", { type: "button", class: "btn" }, "確定"); ok.onclick = () => { const c = inp.value.trim(); if (c) onPick([...c][0]); };
   inp.onkeydown = e => { if (e.key === "Enter") ok.click(); };
   const left = el("div", { class: "hwcv" }); left.append(cv, tools(clr));
-  const right = el("div", { class: "hwr" }); right.append(cands); const row = el("div", { class: "row2" }); row.append(inp, ok); right.append(row);
+  const right = el("div", { class: "hwr" }); right.append(cands); const row = el("div", { class: "row2" }); row.append(inp, ok); if (!ho.noType) right.append(row);
   wrap.append(left, right);
   wrap.reset = () => clr.click();
   wrap.pick = onPick;
@@ -752,7 +752,7 @@ function listenOnce(onText, onState) {
 /* produce({ id, label, check(text) → { st: "ok" | "no" | "check", msg }, size }) */
 function produce(o) {
   const box = el("div", { class: "prod" });
-  const modes = allowedModes();
+  const modes = o.modes || allowedModes();
   const tabs = el("div", { class: "pmodes" }); const area = el("div", { class: "parea" });
   const res = el("div", { class: "gcres", "aria-live": "polite" });
   const q = qid(o.label); let solved = false, wrong = 0;
@@ -773,7 +773,7 @@ function produce(o) {
     } else if (m === "write") {
       const ans = el("span", { class: "pans", "aria-live": "polite" }); let cur = "";
       const paint = () => ans.textContent = cur || "　";
-      const pad = handwritePad(ch => { cur += ch; paint(); pad.reset(); });
+      const pad = handwritePad(ch => { cur += ch; paint(); pad.reset(); }, { noType: !!o.modes && !o.modes.includes("type") });
       const back = el("button", { type: "button", class: "btn" }, "退一字"); back.onclick = () => { cur = [...cur].slice(0, -1).join(""); paint(); };
       const ok = el("button", { type: "button", class: "btn solid" }, "送出"); ok.onclick = () => submit(cur, "write");
       const row = el("div", { class: "row2" }); row.append(el("span", { class: "hint" }, "一次寫一個字，按候選字放進來："), ans, back, ok);
@@ -902,7 +902,9 @@ function deck(sections, o = {}) {
   const dots = el("div", { class: "dots" }), dtools = el("div", { class: "dtools" });
   dots.addEventListener("wheel", e => { if (dots.scrollWidth > dots.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { dots.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
   const ptools = el("div", { class: "ptools only-proj" });
-  bot.append(prev, ptools, dots, dtools, next); root.append(top, prog, stage, bot);
+  /* 學生畫面：「上一個」放在「交給老師」左邊 */
+  if (proj()) bot.append(prev, ptools, dots, dtools, next); else { prev.classList.add("prevr"); bot.append(ptools, dots, prev, dtools, next); }
+  root.append(top, prog, stage, bot);
   root.sections = sections;
   const seen = new Set();
   sections.forEach((s, si) => { if (s.group && (si === 0 || sections[si - 1].group !== s.group)) secs.append(el("span", { class: "dgrp" }, s.group)); const b = el("button", { type: "button", role: "tab", class: s.today ? "today" : "" }, (s.today ? "★ " : "") + s.name); if (s.tip) b.title = s.tip; b.onclick = () => go(si, 0); secs.append(b); s.btn = b; });
@@ -1031,7 +1033,7 @@ function defBankSlides(items, o) {
       r.b.innerHTML = w.h; r.b.classList.remove("sel", "ok", "no"); r.b.classList.add(ok ? "ok" : "no");
       if (!proj() && !r.done) logAns(r.q, ok, w.t);
       if (ok) { r.done = true; c.classList.add("used"); } pick(rows.find(x => !x.done) || null); }; chips.append(c); });
-    const s = slide("", el("div", { class: "hint" }, `先按空格，再從${o.noun || "詞"}庫選出符合解釋的${o.noun || "詞語"}。${o.noun || "詞"}庫裡有用不到的${o.noun || "詞"}。`), splitBox([list], [chips]));
+    const s = slide("", el("div", { class: "hint" }, `先按空格，再從${o.noun || "詞"}庫選出符合解釋的${o.noun || "詞語"}。${o.noun || "詞"}庫裡有用不到的${o.noun || "詞"}。`), chips, list); s.classList.add("dbslide");
     s.onshow = () => { if (!sel) pick(rows.find(x => !x.done) || null); };
     s.reveal = () => rows.forEach(r => { r.b.innerHTML = r.it.h; r.b.classList.add("ok"); r.done = true; });
     out.push(s);

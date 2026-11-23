@@ -1120,8 +1120,6 @@ html.proj .cslide.teach .cimg .row img { width: 140px; }
 .cteach { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 12px; }
 .cslide.teach { align-items: start; }
 .znet { display: grid; gap: 14px; align-content: center; grid-template-columns: none; }
-.zrow { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 12px; align-items: center; }
-.zrow[hidden] { display: none; }
 .zpat { font-family: var(--lf), var(--cjk); font-size: 1.5em; color: var(--muted); text-align: center; letter-spacing: .05em; }
 .zpat .tc, .zw .tc { color: #d4561c; font-weight: inherit; }
 html.proj .zpat { color: #cfd8d6; }
@@ -1205,3 +1203,51 @@ html.proj .wex .kw { color: #ffb37a; }
 html.proj .cslide.teach .cimg .row img { width: 170px; }
 .cslide.teach .zin { font-size: 1.8em; width: 6em; }
 .cslide.teach .zmine .zq { font-size: 2em; }
+
+/* ── 第三版調整 ── */
+/* 語詞教學卡：圖縮小、文字放大 */
+.wteach { grid-template-columns: minmax(220px, 30%) minmax(0, 1fr); }
+.wpics .pic { max-height: 230px; object-fit: contain; }
+.wpics.two .pic { max-height: 200px; }
+.wbody { font-size: 1.3em; }
+.wex .kw, .wbody .kw { font-size: 1em; }
+.wword { font-size: 2.2em; }
+/* 字族卡：字帶注音、造詞 */
+.famk .fch { font-family: var(--zf), var(--cjk); font-size: 2.4em; }
+.famk .fws { grid-column: 1 / -1; font-family: var(--zf), var(--cjk); font-size: 1.3em; color: #1f2a28; }
+.famk:not(.open) .fws { display: none; }
+/* 學生畫面：上一個在交給老師左邊 */
+.nav.prevr { margin-left: auto; }
+/* 詞義：詞庫在上方，句子為主體 */
+.dbslide .dbank { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: .3em 0 .8em; }
+.dbslide .dblist { font-size: 1.35em; line-height: 2.1; }
+.dbslide .dblist li { margin-bottom: .4em; }
+/* 改錯字 */
+.fixline .fz { display: inline-block; cursor: pointer; border: 3px solid transparent; border-radius: 50%; padding: 0 2px; font-family: var(--zf), var(--cjk); }
+.fixline .fz.circ { border-color: #e0453a; }
+.fixw[hidden] { display: none; }
+/* 寫寫看範字用彩字 */
+.model .mimg { width: 100%; max-width: 240px; border-radius: 10px; background: #fff; }
+.wbody { font-size: 1.12em; gap: 10px; }
+.wteach { grid-template-columns: minmax(200px, 28%) minmax(0, 1fr); }
+.wbody .fpk { min-height: 0; padding: 10px 14px; }
+.famk { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+.famk .ff { font-size: 1.2em; }
+.famk .fe { display: none; }
+.famk .fm, .famk .fws { grid-column: auto; }
+.wbody .fpk { min-height: 2.4em !important; height: auto !important; }
+.wbody .wqs .pqi { padding: 6px 12px; }
+.wbody { font-size: 1em; }
+.wword { font-size: 2em; }
+.wbody { font-size: 1.2em; }
+.wword { font-size: 2.1em; }
+.wbody .fpk { font-size: .85em; }
+.wteach.one { grid-template-columns: 1fr; }
+.wrow.expic .wpi .pic { width: 180px; height: auto; border-radius: 10px; border: 2px solid var(--line); display: block; }
+.wteach.one .wbody { grid-template-columns: minmax(0, 1fr) 30%; column-gap: 18px; }
+.wteach.one .wbody > :not(.wqs) { grid-column: 1; }
+.wteach.one .wqs { grid-column: 2; grid-row: 1 / span 6; border-top: 0; border-left: 2px dashed var(--line); padding: 0 0 0 14px; align-content: start; }
+.wrow.expic .wpi .pic { width: 150px; }
+.fixline { font-size: 1.9em; line-height: 2; }
+.model .mimg { width: 170px; max-width: none; }
+.model:has(.mimg) { width: auto; height: auto; padding: 6px; }
