@@ -1290,6 +1290,18 @@ html.proj .cslide.teach .cimg .row img { width: 6.5em; }
 .fpopbox .fptrow { color: #c0461a; }
 .cslide.teach .zcards { grid-template-columns: repeat(auto-fill, minmax(15em, 1fr)); }
 .cslide.teach .zcard .zw { font-size: 1.45em; }
+/* 背景知識：提問改成按鈕，卡片文字放大 */
+.bgq { display: flex; align-items: center; gap: .5em; margin-top: .6em; }
+.bgqi { font-size: 1.3em; }
+.bgqb { font-size: 1.2em; min-width: 2.6em; padding: .15em .5em; border-radius: 12px; }
+.bgtop { grid-template-columns: minmax(0, 36%) minmax(0, 1fr); }
+.bgtx .bgtext { font-size: 1.25em; line-height: 1.75; }
+.qpop { display: grid; gap: .6em; padding-top: .4em; }
+.qpopn { font-size: 1.2em; color: #c0461a; font-weight: 700; }
+.qpopt { font-family: var(--zf), var(--cjk); font-size: 1.45em; line-height: 2; }
+.bgt { font-size: 1.15em; margin: 0 0 .3em; }
+.bgtop { grid-template-columns: minmax(0, 32%) minmax(0, 1fr); }
+.bgq { margin-top: .3em; }
 
 
 .lockp{display:block;padding:14px 18px;border:2px dashed #c9b28a;border-radius:12px;background:#fffaf0;color:#6b5a3a;line-height:1.8}

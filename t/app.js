@@ -859,7 +859,7 @@ function fitInfo(sl) {
 }
 /* 字級下限：投影約 21px、學生約 19px；再小就寧可讓卡片捲動 */
 function fitLo(sl) { if (sl.querySelector(".zkb, canvas")) return .74; /* 有注音鍵盤、寫字格的作答卡維持可整頁看到 */ const b = parseFloat(getComputedStyle(sl).fontSize) || 16; return Math.max(.74, (proj() ? 21 : 19) / b); }
-function fitValue(sl, lo, hi = FIT_HI) {
+function fitValue(sl, lo, hi = proj() ? 3.6 : FIT_HI) {
   const f = fitInfo(sl); if (!f || sl.dataset.nofit) return null; const old = f.inner.style.fontSize; if (lo == null) lo = fitLo(sl);
   const fits = k => { f.inner.style.fontSize = k + "em"; return f.inner.offsetHeight <= f.avail * .97; };
   let v;
@@ -1569,13 +1569,13 @@ function lessonHead() { return el("div", { class: "lhead" }, `<span class="ltitl
 
 /* ── 投影：背景知識卡、提問卡 ── */
 function bgSlide(b) {
-  const qs = el("div", { class: "pq" });
-  (b.q || []).forEach((t, i) => qs.append(el("div", { class: "pqi" }, `<span class="qn">${"①②③④⑤⑥"[i]}</span><span>${t}</span>`)));
-  if ((b.q || []).length > 2) qs.classList.add("two");
+  /* 提問收成按鈕，按了用浮動視窗一󠇢題一󠇢題大字顯示，讓卡片文字可以放大 */
+  const qs = el("div", { class: "bgq" }); qs.append(el("span", { class: "bgqi" }, "💬"));
+  (b.q || []).forEach((t, i) => { const bt = el("button", { type: "button", class: "btn bgqb", "aria-label": `第${i + 1}題提問` }, "①②③④⑤⑥"[i]); bt.onclick = () => qPop(b.q, i); qs.append(bt); });
   const top = el("div", { class: "bgtop" }); const tx = el("div", { class: "bgtx" });
   tx.append(el("div", { class: "bgtext" }, b.text), sayBtn(() => plainText(b.text), "唸卡片"));
   top.append(el("div", { class: "bgimg" }, pic(b.img, b.title)), tx);
-  const s = slide("", kick("背景知識"), el("h2", { class: "bgt" }, b.title), top, qs); s.dataset.fg = "bg" + b.title; return s;
+  const s = slide("", el("h2", { class: "bgt" }, b.title), top, qs); s.dataset.fg = "bg" + b.title; return s;
 }
 function projQSlide(x) {
   const box = el("div", { class: "pq big" });
@@ -1598,6 +1598,18 @@ function structSlides() {
 }
 function peekBox(html, cls) { const b = el("button", { type: "button", class: "fpk " + (cls || "") }, `<span class="fpk-c">${html}</span><span class="fpk-h">按一󠇡下顯示</span>`); b.onclick = () => b.classList.toggle("open"); return b; }
 /* 三座塔表格 */
+/* 提問浮動視窗：一󠇢題一󠇢題看 */
+function qPop(list, i) {
+  const d = el("div", { class: "qpop" });
+  d.append(el("div", { class: "qpopn" }, "①②③④⑤⑥"[i]), el("div", { class: "qpopt" }, list[i]));
+  const nav = el("div", { class: "fptnav" });
+  const pv = el("button", { type: "button", class: "btn" }, "‹ 上一󠇢題"), nx = el("button", { type: "button", class: "btn solid" }, "下一󠇢題 ›");
+  pv.disabled = i === 0; nx.disabled = i === list.length - 1;
+  nav.append(pv, sayBtn(() => plainText(list[i]), "唸題目"), nx); d.append(nav);
+  let close; const go = (dir, c) => { const n = i + dir; if (n < 0 || n >= list.length) return; (c || close)(); qPop(list, n); };
+  pv.onclick = () => go(-1); nx.onclick = () => go(1);
+  close = popup(d, go);
+}
 /* ── 浮動視窗：一󠇡次只看一󠇢格，字放大 ── */
 function popup(node, onNav) {
   const ov = el("div", { class: "fpop", role: "dialog", "aria-modal": "true" });

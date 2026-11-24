@@ -858,7 +858,7 @@ function fitInfo(sl) {
 }
 /* 字級下限：投影約 21px、學生約 19px；再小就寧可讓卡片捲動 */
 function fitLo(sl) { if (sl.querySelector(".zkb, canvas")) return .74; /* 有注音鍵盤、寫字格的作答卡維持可整頁看到 */ const b = parseFloat(getComputedStyle(sl).fontSize) || 16; return Math.max(.74, (proj() ? 21 : 19) / b); }
-function fitValue(sl, lo, hi = FIT_HI) {
+function fitValue(sl, lo, hi = proj() ? 3.6 : FIT_HI) {
   const f = fitInfo(sl); if (!f || sl.dataset.nofit) return null; const old = f.inner.style.fontSize; if (lo == null) lo = fitLo(sl);
   const fits = k => { f.inner.style.fontSize = k + "em"; return f.inner.offsetHeight <= f.avail * .97; };
   let v;

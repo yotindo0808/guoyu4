@@ -369,13 +369,13 @@ function lessonHead() { return el("div", { class: "lhead" }, `<span class="ltitl
 
 /* ── 投影：背景知識卡、提問卡 ── */
 function bgSlide(b) {
-  const qs = el("div", { class: "pq" });
-  (b.q || []).forEach((t, i) => qs.append(el("div", { class: "pqi" }, `<span class="qn">${"①②③④⑤⑥"[i]}</span><span>${t}</span>`)));
-  if ((b.q || []).length > 2) qs.classList.add("two");
+  /* 提問收成按鈕，按了用浮動視窗一題一題大字顯示，讓卡片文字可以放大 */
+  const qs = el("div", { class: "bgq" }); qs.append(el("span", { class: "bgqi" }, "💬"));
+  (b.q || []).forEach((t, i) => { const bt = el("button", { type: "button", class: "btn bgqb", "aria-label": `第${i + 1}題提問` }, "①②③④⑤⑥"[i]); bt.onclick = () => qPop(b.q, i); qs.append(bt); });
   const top = el("div", { class: "bgtop" }); const tx = el("div", { class: "bgtx" });
   tx.append(el("div", { class: "bgtext" }, b.text), sayBtn(() => plainText(b.text), "唸卡片"));
   top.append(el("div", { class: "bgimg" }, pic(b.img, b.title)), tx);
-  const s = slide("", kick("背景知識"), el("h2", { class: "bgt" }, b.title), top, qs); s.dataset.fg = "bg" + b.title; return s;
+  const s = slide("", el("h2", { class: "bgt" }, b.title), top, qs); s.dataset.fg = "bg" + b.title; return s;
 }
 function projQSlide(x) {
   const box = el("div", { class: "pq big" });
@@ -398,6 +398,18 @@ function structSlides() {
 }
 function peekBox(html, cls) { const b = el("button", { type: "button", class: "fpk " + (cls || "") }, `<span class="fpk-c">${html}</span><span class="fpk-h">按一下顯示</span>`); b.onclick = () => b.classList.toggle("open"); return b; }
 /* 三座塔表格 */
+/* 提問浮動視窗：一題一題看 */
+function qPop(list, i) {
+  const d = el("div", { class: "qpop" });
+  d.append(el("div", { class: "qpopn" }, "①②③④⑤⑥"[i]), el("div", { class: "qpopt" }, list[i]));
+  const nav = el("div", { class: "fptnav" });
+  const pv = el("button", { type: "button", class: "btn" }, "‹ 上一題"), nx = el("button", { type: "button", class: "btn solid" }, "下一題 ›");
+  pv.disabled = i === 0; nx.disabled = i === list.length - 1;
+  nav.append(pv, sayBtn(() => plainText(list[i]), "唸題目"), nx); d.append(nav);
+  let close; const go = (dir, c) => { const n = i + dir; if (n < 0 || n >= list.length) return; (c || close)(); qPop(list, n); };
+  pv.onclick = () => go(-1); nx.onclick = () => go(1);
+  close = popup(d, go);
+}
 /* ── 浮動視窗：一次只看一格，字放大 ── */
 function popup(node, onNav) {
   const ov = el("div", { class: "fpop", role: "dialog", "aria-modal": "true" });
