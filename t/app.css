@@ -1,7 +1,7 @@
 
 /* 版面構想：上方一列工具（課次、分頁、模式、注音、字級），下方一次只顯示一張卡片，用按鈕或左右鍵切換，盡量不必上下滑動 */
 /* 全站芫荽體：介面文字另存一份小字型；各課的芫荽體（--lf）與注音芫荽體（--zf）依課次子集，進入哪一課才載入 */
-@font-face { font-family: "IansuiUI"; src: url(fonts/ui.woff2?v=a2656774) format("woff2"); font-display: block; }
+@font-face { font-family: "IansuiUI"; src: url(fonts/ui.woff2?v=73a32f6a) format("woff2"); font-display: block; }
 :root {
   --bg: #f4f1ea;            /* 米白紙色 */
   --paper: #fffdf8;
@@ -1251,6 +1251,45 @@ html.proj .cslide.teach .cimg .row img { width: 170px; }
 .fixline { font-size: 1.9em; line-height: 2; }
 .model .mimg { width: 170px; max-width: none; }
 .model:has(.mimg) { width: auto; height: auto; padding: 6px; }
+/* 背景知識：圖文上排、提問下排，字放大 */
+.bgtop { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); gap: 1.2em; align-items: center; }
+.bgtop .bgimg .pic, .bgtop .bgimg svg, .bgtop .bgimg img { width: 100%; height: auto; max-height: 34vh; object-fit: contain; }
+.bgtx .bgtext { font-size: 1.15em; line-height: 1.8; }
+.pq.two { display: grid; grid-template-columns: 1fr 1fr; gap: .5em .8em; }
+/* ── 大螢幕：投影內容不要只佔中間一塊 ── */
+html.proj .slide > .inner { max-width: min(96vw, 1840px); }
+.bgtop .bgimg { max-width: none; }
+.bgtop .bgimg .pic { width: 100%; max-height: 40vh; }
+/* 生字卡改用 em，讓字隨螢幕放大 */
+.cslide.teach .zcards { grid-template-columns: repeat(auto-fill, minmax(12em, 1fr)); }
+.cslide.teach .zcard { min-height: 3.6em; }
+.cslide.teach .zcard .zw { font-size: 1.6em; }
+.cslide.teach .zcard .zx, .cslide.teach .zcard .zh { font-size: 1.5em; }
+.cslide.teach .zcard .zh .pic { width: 2.2em; height: 1.65em; }
+html.proj .cslide.teach .cimg .row img { width: 6.5em; }
+/* 三座建築：總表＋浮動視窗 */
+.tgrid { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: .5em; align-items: stretch; }
+.tgcol { text-align: center; font-weight: 700; font-size: 1.1em; }
+.tgcol .pic { width: 100%; max-height: 26vh; object-fit: contain; display: block; margin: 0 auto .2em; border-radius: 10px; background: #eef3f7; }
+.tgrow { display: grid; place-items: center; padding: 0 .6em; font-weight: 700; font-size: 1.15em; color: var(--accent); }
+.tgcell { font-size: 1.6em; padding: .3em; min-height: 2.4em; border-radius: 14px; border: 2px dashed var(--line); background: rgba(255,255,255,.06); color: inherit; cursor: pointer; }
+.tgcell:hover { background: rgba(255,255,255,.14); }
+.fpop { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.55); display: grid; place-items: center; padding: 3vh 3vw; }
+.fpopbox { position: relative; width: min(1500px, 94vw); max-height: 92vh; overflow: auto; background: var(--paper, #fffdf6); color: #1f2a28; border-radius: 20px; padding: 2.2vh 2.4vw; box-shadow: 0 20px 60px rgba(0,0,0,.4); font-size: clamp(22px, 2.6vw, 44px); }
+.fpx { position: absolute; top: 12px; right: 12px; font-size: 22px; }
+.fpthead { display: grid; grid-template-columns: 30% 1fr; gap: 1em; align-items: center; }
+.fpthead .pic { width: 100%; border-radius: 14px; background: #eef3f7; }
+.fptcol { font-size: 1.3em; font-weight: 700; }
+.fptrow { color: #d4561c; font-weight: 700; }
+.fptbody { font-family: var(--zf), var(--cjk); font-size: 1.25em; line-height: 2.1; margin: .6em 0; }
+.fptbody .fpk { display: inline-block; width: auto; min-width: 4em; vertical-align: middle; }
+.fptnav { display: flex; gap: 14px; align-items: center; justify-content: space-between; font-size: 22px; }
+.bgtop .bgimg { width: 100%; margin: 0; }
+.bgtop .bgimg .pic { border-radius: 14px; }
+.fpopbox { background: #fffdf6; color: #1f2a28; }
+.fpopbox .fptrow { color: #c0461a; }
+.cslide.teach .zcards { grid-template-columns: repeat(auto-fill, minmax(15em, 1fr)); }
+.cslide.teach .zcard .zw { font-size: 1.45em; }
 
 
 .lockp{display:block;padding:14px 18px;border:2px dashed #c9b28a;border-radius:12px;background:#fffaf0;color:#6b5a3a;line-height:1.8}

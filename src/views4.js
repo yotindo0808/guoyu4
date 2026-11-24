@@ -371,9 +371,11 @@ function lessonHead() { return el("div", { class: "lhead" }, `<span class="ltitl
 function bgSlide(b) {
   const qs = el("div", { class: "pq" });
   (b.q || []).forEach((t, i) => qs.append(el("div", { class: "pqi" }, `<span class="qn">${"①②③④⑤⑥"[i]}</span><span>${t}</span>`)));
-  const left = el("div", { class: "bgimg" }, pic(b.img, b.title)); const right = el("div");
-  right.append(el("div", { class: "bgtext" }, b.text), sayBtn(() => plainText(b.text), "唸卡片"), qs);
-  return slide("", kick("背景知識"), el("h2", { class: "bgt" }, b.title), splitBox([left], [right]));
+  if ((b.q || []).length > 2) qs.classList.add("two");
+  const top = el("div", { class: "bgtop" }); const tx = el("div", { class: "bgtx" });
+  tx.append(el("div", { class: "bgtext" }, b.text), sayBtn(() => plainText(b.text), "唸卡片"));
+  top.append(el("div", { class: "bgimg" }, pic(b.img, b.title)), tx);
+  const s = slide("", kick("背景知識"), el("h2", { class: "bgt" }, b.title), top, qs); s.dataset.fg = "bg" + b.title; return s;
 }
 function projQSlide(x) {
   const box = el("div", { class: "pq big" });
@@ -396,8 +398,46 @@ function structSlides() {
 }
 function peekBox(html, cls) { const b = el("button", { type: "button", class: "fpk " + (cls || "") }, `<span class="fpk-c">${html}</span><span class="fpk-h">按一下顯示</span>`); b.onclick = () => b.classList.toggle("open"); return b; }
 /* 三座塔表格 */
+/* ── 浮動視窗：一次只看一格，字放大 ── */
+function popup(node, onNav) {
+  const ov = el("div", { class: "fpop", role: "dialog", "aria-modal": "true" });
+  const box = el("div", { class: "fpopbox" });
+  const x = el("button", { type: "button", class: "btn fpx", "aria-label": "關閉" }, "✕");
+  const close = () => { ov.remove(); document.removeEventListener("keydown", key); };
+  const key = e => { if (e.key === "Escape") close(); else if (onNav && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.stopPropagation(); e.preventDefault(); onNav(e.key === "ArrowRight" ? 1 : -1, close); } };
+  x.onclick = close; ov.onclick = e => { if (e.target === ov) close(); };
+  box.append(x, node); ov.append(box); document.body.append(ov); document.addEventListener("keydown", key, true);
+  return close;
+}
+/* 三座建築比一比（投影）：表格只放圖和按鈕，按格子開浮動視窗看內容 */
+function towerProj(T) {
+  const cells = []; T.rows.forEach((r, ri) => T.cols.forEach((c, k) => cells.push({ ri, k })));
+  const show = idx => {
+    const { ri, k } = cells[idx]; const r = T.rows[ri];
+    const d = el("div", { class: "fpt" });
+    d.append(el("div", { class: "fpthead" }, `${pic(T.imgs[k], T.cols[k])}<div><div class="fptcol">${T.cols[k]}</div><div class="fptrow">${r.h}</div></div>`));
+    const body = el("div", { class: "fptbody" });
+    String(r.cells[k]).split(/(\{[^}]*\})/).forEach(p => { const m = p.match(/^\{(.*)\}$/); if (m) body.append(peekBox(m[1], "inl")); else if (p) body.insertAdjacentHTML("beforeend", p); });
+    const nav = el("div", { class: "fptnav" });
+    const pv = el("button", { type: "button", class: "btn" }, "‹ 上一格"), nx = el("button", { type: "button", class: "btn solid" }, "下一格 ›");
+    nav.append(pv, sayBtn(() => plainText(String(r.cells[k]).replace(/[{}]/g, "")), "唸這一格"), nx);
+    d.append(body, nav);
+    let close;
+    const go = (dir, c) => { (c || close)(); const n = idx + dir; if (n >= 0 && n < cells.length) show(n); };
+    pv.onclick = () => go(-1); nx.onclick = () => go(1); pv.disabled = idx === 0; nx.disabled = idx === cells.length - 1;
+    close = popup(d, go);
+  };
+  const g = el("div", { class: "tgrid" });
+  g.append(el("div", { class: "tg0" }, ""));
+  T.cols.forEach((c, k) => g.append(el("div", { class: "tgcol" }, `${pic(T.imgs[k], c)}<div>${c}</div>`)));
+  T.rows.forEach((r, ri) => { g.append(el("div", { class: "tgrow" }, r.h));
+    T.cols.forEach((c, k) => { const b = el("button", { type: "button", class: "tgcell", "aria-label": `${c}的${plainText(r.h)}` }, "🔍"); b.onclick = () => show(ri * T.cols.length + k); g.append(b); }); });
+  const s = slide("", kick("三座建築比一比"), g); s.dataset.nofit = "1"; return s;
+}
+
 function towerSlide() {
   const T = L.towers; const ctx = {}; const blanks = [];
+  if (proj()) return towerProj(T);
   const tb = el("table", { class: "tower" }); const th = el("tr"); th.append(el("th", {}, ""));
   T.cols.forEach((c, k) => th.append(el("th", {}, `${pic(T.imgs[k], c)}<div>${c}</div>`))); tb.append(th);
   T.rows.forEach(r => { const tr = el("tr"); tr.append(el("th", {}, r.h));
@@ -418,7 +458,7 @@ const VIEWS = {
         { name: "背景知識", hint: "先用圖片和生活經驗想一想，再讀課文。", slides: L.bg.map(bgSlide) },
         { name: "分段讀", hint: "畫底線的是詞語，按一下看意思；黃色底的字是本課生字。", slides: [...Array(n).keys()].map(i => paraSlide(i)) },
         { name: "課文結構", slides: structSlides() },
-        { name: "三座建築比一比", hint: "按一下格子，顯示答案。", slides: [towerSlide()] },
+        { name: "三座建築比一比", hint: "按 🔍 打開那一格，看完按「下一格」。", slides: [towerSlide()] },
         { name: "段落大意", hint: "先按空格，再按詞語。", slides: bankSlides(L.summary.map(x => x.t), L.sumBank, "段落大意", { kick: L.summary.map(x => x.label) }) },
         { name: "提問", slides: L.projq.map(projQSlide), extra: iconLegend() },
       ];
@@ -487,7 +527,7 @@ const VIEWS = {
         const clr = el("button", { type: "button", class: "btn stepbtn", "aria-label": "清除", title: "清除" }, "⌫"); clr.onclick = () => { inp.value = inp.value.slice(0, -1); };
         mine.append(el("span", { class: "zq" }, "💬"), inp, clr, hw, add, el("span", { class: "sp" }, ""), flipAll);
         right.append(net, mine, hwBox);
-        const g = el("div", { class: "cslide teach" }); g.append(left, right); const sl = slide("", g); sl.dataset.nofit = "1"; return sl;
+        const g = el("div", { class: "cslide teach" }); g.append(left, right); const sl = slide("", g); sl.dataset.fg = "cteach"; return sl;
       });
       return deck([{ name: "生字", hint: "✂️ 拆一拆 → 翻開詞卡 → 💬 還能造什麼詞？（🔗 到字音字形）", slides, dotChars: L.cards.map(c => c.c) }]);
     }

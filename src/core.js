@@ -1010,7 +1010,7 @@ function exPop(label, html, w) {
   return b;
 }
 document.addEventListener("click", e => { const p = document.querySelector(".expop"); if (p && !p.contains(e.target)) p.remove(); });
-addEventListener("hashchange", () => { const p = document.querySelector(".expop"); if (p) p.remove(); });
+addEventListener("hashchange", () => { document.querySelectorAll(".expop, .fpop").forEach(p => p.remove()); });
 const toggleBtn = (label, on, off, fn) => { const b = el("button", { type: "button", class: "btn" }, label); let st = false; b.onclick = () => { st = !st; b.textContent = st ? off : on; fn(st); }; b.textContent = on; return b; };
 
 /* ── 依解釋填詞（考卷題型）：每頁最多 6 題，詞庫多放 2 個干擾詞，用按的作答 ── */
