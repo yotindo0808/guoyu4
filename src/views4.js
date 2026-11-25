@@ -201,6 +201,29 @@ function fixSlide(x) {
   return s;
 }
 
+/* 學生：字族文圈一圈（按出同一家的字，按錯會提示） */
+function circleSlide(F) {
+  const set = new Set(F.fam.map(x => plainText(x[0]))); const q = qid(`字族文圈一圈：${F.id}家族`);
+  const box = el("div", { class: "poem" }); const msg = el("div", { class: "segmsg", "aria-live": "polite" }); let need = 0, got = 0;
+  F.poem.forEach(line => { const p = el("div", { class: "pline" }); GR(line).forEach(g => { const ch = g[0]; const b = el("span", { class: "pz fm" }, g);
+    if (set.has(ch)) need++;
+    if (!/[，。？！、]/.test(ch)) b.onclick = () => { if (b.classList.contains("circ")) return;
+      if (set.has(ch)) { b.classList.add("circ"); got++; msg.innerHTML = got >= need ? '<span class="okmsg">√ 全部找到了！</span>' : `<span class="okmsg">√ 找到 ${got} 個，還有 ${need - got} 個。</span>`; if (got >= need) { logAns(q, true, `${got}個`); box.classList.add("answered"); } }
+      else { b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 400); msg.innerHTML = `<span class="nomsg">「${ch}」不是${F.id}家族的字，再找找看。</span>`; logAns(q, false, ch); } };
+    p.append(b); }); box.append(p); });
+  const sr = el("div", { class: "sayrow" }); sr.append(sayBtn(() => plainText(F.poem.join("")), "唸字族文"));
+  const s = slide("", kick(`${F.id}家族：圈一圈`), el("div", { class: "inst" }, `讀一讀，按出有「${F.id}」的字。`), sr, box, msg); s.dataset.nofit = "1";
+  s.reveal = () => box.querySelectorAll(".pz").forEach(b => { if (set.has(b.textContent[0])) b.classList.add("circ"); }); return s;
+}
+/* 基礎層：字族配對（聽一句字族文，選出句子裡的字） */
+function famPickSlides(F) {
+  const fam = F.fam.map(x => plainText(x[0]));
+  return F.poem.map(line => { const t = plainText(line); const ch = fam.find(c => t.includes(c)); if (!ch) return null;
+    const others = shuffle(fam.filter(c => c !== ch)).slice(0, 2);
+    const stem = el("div", { class: "stem big-line" }, nz(t.split(ch).join("□")));
+    return listenSlide(t, [ch, ...others], 0, `字族配對：${ch}`, { cls: "bigc", stem, hint: "聽一聽，□裡是哪一個字？" }); }).filter(Boolean);
+}
+
 /* ── 照樣寫：每個空格有詞庫，點詞放進空格，也可以自己打 ── */
 function phraseSlide(p, i) {
   const w = writeBox(`照樣寫${i + 1}`); const ta = w.querySelector("textarea");
@@ -617,48 +640,90 @@ const VIEWS = {
       secs.push({ name: "多音字", slides: [polyTeach] });
       const d = deck(secs); const bb = backBtn(); if (bb) d.append(bb); return d;
     }
-    if (T === "base") return deck([{ name: "部首歸類", hint: "找出有這個部首的字。", slides: radS }, { name: "完成", slides: [finishSlide()] }], { submit: true });
-    return deck([{ name: "形近字", hint: "選出句子裡要用的字。", slides: zxS }, { name: "多音字", hint: `判斷「${P.c}」在句子裡怎麼讀。`, slides: [polyTeach, ...polyS] }, { name: "完成", slides: [finishSlide()] }], { submit: true });
+    if (T === "base") { const fp = (L.zz || []).filter(F => ["青", "合"].includes(F.id)).flatMap(famPickSlides);
+      return deck([{ name: "部首歸類", hint: "找出有這個部首的字。", slides: radS }, { name: "字族配對", hint: "聽一句字族文，選出□裡的字。", slides: fp }, { name: "完成", slides: [finishSlide()] }], { submit: true }); }
+    const cs = (L.zz || []).map(circleSlide);
+    return deck([{ name: "字族文圈一圈", hint: "讀字族文，按出同一家的字。", slides: cs }, { name: "形近字", hint: "選出句子裡要用的字。", slides: zxS }, { name: "多音字", hint: `判斷「${P.c}」在句子裡怎麼讀。`, slides: [polyTeach, ...polyS] }, { name: "完成", slides: [finishSlide()] }], { submit: true });
   },
 
   jx() {
-    const T = tier(); const J = L.jx; const COL = ["b1", "b2", "b3"];
-    const blocks = (arr, empty) => { const d = el("div", { class: "blocks" }); arr.forEach((t, k) => d.append(el("span", { class: "blk " + COL[k] + (t ? "" : " empty") }, t || J.blocks[k]))); return d; };
-    const legend = el("div", { class: "blegend" }); J.blocks.forEach((t, k) => legend.append(el("span", { class: "blk " + COL[k] }, t)));
+    const T = tier(); const J = L.jx; const COL = ["b1", "b2", "b3"]; const B = L.bd;
+    const blocks = arr => { const d = el("div", { class: "blocks" }); arr.forEach((t, k) => d.append(el("span", { class: "blk " + COL[k] + (t ? "" : " empty") }, t || J.blocks[k]))); return d; };
+    const legend = () => { const d = el("div", { class: "blegend" }); J.blocks.forEach((t, k) => d.append(el("span", { class: "blk " + COL[k] }, t))); return d; };
+    const sent = a => `${a[0]}，${a[1]}${a[2]}。`;
+    /* 點選詞卡放進寫作框，也可以自己打 */
+    const ideaBox = (label, pre, post, ideas) => {
+      const w = writeBox(label); const ta = w.querySelector("textarea"); ta.value = pre + (post || "");
+      const bank = el("div", { class: "bank ideas2" }); bank.append(el("span", { class: "ideai" }, "💡"));
+      ideas.forEach(t => { const c = el("button", { type: "button", class: "chip" }, t); c.onclick = () => { ta.value = pre + t + (post || "。"); ta.dispatchEvent(new Event("input")); if (ta.onchange) ta.onchange(); }; bank.append(c); });
+      const d = el("div"); d.append(bank, el("div", { class: "inst" }, "點一張想法卡，或在下面自己打、自己改："), w); return d;
+    };
+    /* 按出句子裡的「情況」 */
+    const findSlide = (parts, i, title) => {
+      const q = qid(`認識結構${i + 1}`); const line = el("div", { class: "stem big-line findline" }); const msg = el("div", { class: "segmsg", "aria-live": "polite" }); let done = false;
+      parts.forEach((t, k) => { if (/^[，。]$/.test(t) || k === 0 && t === "假如") { line.append(t); return; }
+        const b = el("button", { type: "button", class: "seg" }, t); b.onclick = () => { if (done) return; const ok = k === 1; if (!proj()) logAns(q, ok, t);
+          if (ok) { done = true; b.classList.add("blk", "b1"); msg.innerHTML = '<span class="okmsg">√ 對！這是「情況」。</span>'; root.classList.add("answered"); }
+          else { b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 400); msg.innerHTML = '<span class="nomsg">這不是情況。情況是「假如」後面說的事。</span>'; } }; line.append(b); });
+      const root = el("div"); root.append(line, msg);
+      const s = slide("", kick(title), el("div", { class: "inst" }, "按出句子裡的「情況」。"), legend(), root, sayBtn(parts.join(""), "唸句子"));
+      s.reveal = () => { line.querySelectorAll(".seg")[0].classList.add("blk", "b1"); }; return s;
+    };
+    /* 只換情況（點選＋自己打） */
+    const swapSit = (opts, title) => {
+      const q = qid(title); const tail = "，我們就去台北一○一大樓看風景。";
+      const line = el("div", { class: "stem big-line" }); const paint = t => { line.innerHTML = `假如<span class="slot2 b1">${t || "情況"}</span>${tail}`; }; paint();
+      const bank = el("div", { class: "bank" }); opts.forEach(t => { const c = el("button", { type: "button", class: "chip" }, t); c.onclick = () => { paint(t); if (!proj()) logText(q, `假如${t}${tail}`); root.classList.add("answered"); }; bank.append(c); });
+      const own = el("input", { type: "text", class: "ownin", placeholder: "自己打", "aria-label": "自己打一個情況", maxlength: "14" });
+      own.addEventListener("input", () => paint(own.value.trim()));
+      own.addEventListener("change", () => { const t = own.value.trim(); if (t && !proj()) { logText(q, `假如${t}${tail}`); root.classList.add("answered"); } });
+      const orow = el("div", { class: "ownrow" }, "✏️ "); orow.append(own);
+      const root = el("div"); root.append(line, bank, orow);
+      return slide("", kick(title), el("div", { class: "inst" }, "選一個情況放進句子，也可以自己打。唸唸看。"), blocks(["", J.demo[1], J.demo[2]]), root);
+    };
     const ck = ["有用到「假如」和「就」", "前後在說同一件事", "有標點符號"];
-    /* ① 看示範 */
-    const s1 = slide("", kick("① 看示範"), el("div", { class: "stem big-line" }, `${J.demo[0]}，${J.demo[1]}${J.demo[2]}。`), blocks(J.demo), legend.cloneNode(true), sayBtn(`${J.demo[0]}，${J.demo[1]}${J.demo[2]}。`, "唸句子"));
-    /* ② 仿寫：換情況 */
-    const ctx2 = {}; const l2 = fillLine(["假如", { ans: "", h: "" }, "，我們就去台北一○一大樓看風景。"], [], ctx2, "仿寫（換情況）");
-    l2.blanks[0].dataset.ans = ""; l2.blanks[0].textContent = "　　　　";
-    const chips2 = el("div", { class: "bank" }); J.s2.opts.forEach(t => { const b = el("button", { type: "button", class: "chip" }, t); b.onclick = () => { l2.blanks[0].textContent = t; l2.blanks[0].classList.add("ok"); if (!proj()) logText(qid2, `假如${t}，我們就去台北一○一大樓看風景。`); s2.classList.add("answered"); l2.parentNode.classList.add("answered"); }; chips2.append(b); });
-    const qid2 = qid("② 仿寫：只換情況");
-    const st2 = el("div", { class: "stem big-line" }); st2.append(l2);
-    const s2 = slide("", kick("② 仿寫：只換「情況」"), el("div", { class: "hint" }, "選一個情況放進空格，唸唸看。"), blocks(["", J.demo[1], J.demo[2]]), st2, chips2);
-    /* ③ 替換：換情況和做什麼 */
-    const s3 = swapSlide(J, T);
-    const slides = [s1, s2, s3];
+    const slides = [];
     if (T !== "base") {
-      /* ④ 半開放 */
-      J.s4.forEach((x, i) => { const w = writeBox(`④ 半開放${i + 1}：${x.pre}`); w.querySelector("textarea").value = x.pre; const s = slide("", kick("④ 補完句子"), el("div", { class: "stem big-line" }, `${x.pre}……`), w, refBox(esc(x.pre + x.ref + "。"))); slides.push(s); });
-      /* ⑤ 自己造句 */
-      { const w = writeBox("⑤ 自己造句（假如……就……）"); const c = el("div", { class: "selfck only-stu" }); c.append(el("div", { class: "hint" }, "寫完檢查："), checklist(ck)); slides.push(slide("", kick("⑤ 自己造句"), el("div", { class: "stem" }, "用「假如……就……」自己造一句。"), legend.cloneNode(true), w, c, refBox(esc(J.s5ref)))); }
-      /* ⑥ 接成兩句 */
-      { const w = writeBox("⑥ 接成兩句"); const c = el("div", { class: "selfck only-stu" }); c.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["第一句用到「假如……就……」", "第二句和第一句在說同一件事", "兩句都有標點符號"])); slides.push(slide("", kick("⑥ 接成兩句"), el("div", { class: "stem" }, "在自己的句子後面，寫出有關係的第二句。"), w, c, refBox(esc(J.s6ref)))); }
+      /* ① 看示範：三個例句 */
+      const ex = el("div", { class: "demos" }); J.demos.forEach(d => { const r = el("div", { class: "demo1" }); r.append(blocks(d), sayBtn(sent(d), "唸句子")); ex.append(r); });
+      slides.push(slide("", kick("① 看示範"), legend(), ex));
+      /* ② 認識結構 */
+      J.find.forEach((f, i) => slides.push(findSlide(f, i, "② 認識結構")));
+      /* ③ 仿寫：換情況 */
+      slides.push(swapSit(J.s2.opts, "③ 仿寫：只換「情況」"));
+      /* ④ 替換：換情況和做什麼（可自己打後半句） */
+      { const s4 = swapSlide(J, T); const w = writeBox("④ 替換：自己組一句"); const d = el("div", { class: "ownbox" }); d.append(el("div", { class: "inst" }, "也可以自己打一句："), w); s4.querySelector(".combo").append(d); const kk = s4.querySelector(".kicker"); if (kk) kk.textContent = "④ 替換：換「情況」和「做什麼」"; slides.push(s4); }
+      /* ⑤ 補完句子 */
+      J.s4.forEach((x, i) => slides.push(slide("", kick("⑤ 補完句子"), el("div", { class: "stem big-line" }, `${x.pre}〔　　〕${x.post || "。"}`), ideaBox(`⑤ 補完句子${i + 1}`, x.pre, x.post, x.ideas))));
+      /* ⑥ 自己造句 */
+      { const w = writeBox("⑥ 自己造句（假如……就……）"); const cards = el("div", { class: "sitcards" });
+        J.s5cards.forEach(([h, eg]) => { const c = el("button", { type: "button", class: "sitc" }, `<b>${h}</b><span>${eg}</span>`); c.onclick = () => { cards.querySelectorAll(".sitc").forEach(x => x.classList.remove("on")); c.classList.add("on"); }; cards.append(c); });
+        const c = el("div", { class: "selfck only-stu" }); c.append(el("div", { class: "hint" }, "寫完檢查："), checklist(ck));
+        slides.push(slide("", kick("⑥ 自己造句"), el("div", { class: "inst" }, "先選一張情況卡想一想，再寫出完整的句子（可以打字、手寫或用說的）。"), cards, w, c, refBox(esc(J.s5ref)))); }
+      /* ⑦ 接成兩句 */
+      { const w = writeBox("⑦ 接成兩句"); w.querySelector("textarea").placeholder = "假如……，我就……。我會先……，再……。";
+        const c = el("div", { class: "selfck only-stu" }); c.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["第一句用到「假如……就……」", "第二句用「先……再……」說怎麼做", "兩句都有標點符號"]));
+        slides.push(slide("", kick("⑦ 接成兩句"), el("div", { class: "stem" }, "句框：假如……，我就……。<br>我會先……，再……。"), w, c, refBox(esc(J.s6ref)))); }
     } else {
-      /* 基礎層：詞卡排句、口說，最後給參考例句 */
-      slides.push(cardOrderSlide(J.cards, "詞卡排句"));
-      slides.push(slide("", kick("參考例句"), el("div", { class: "refcard big-line" }, esc(J.baseRef)), sayBtn(J.baseRef, "唸例句")));
+      /* 基礎層 */
+      const ex = el("div", { class: "demos" }); J.demos.slice(0, 2).forEach(d => { const r = el("div", { class: "demo1" }); r.append(blocks(d), sayBtn(sent(d), "唸句子")); ex.append(r); });
+      slides.push(slide("", kick("① 看示範"), legend(), ex));
+      slides.push(findSlide(J.find[0], 0, "② 找出「情況」"));
+      slides.push(swapSit(J.s2.base, "③ 換「情況」"));
+      slides.push(swapSlide(Object.assign({}, J, { s3: { pairs: J.s3.pairs.filter(p => ["下雨了", "天氣很熱", "肚子餓了"].includes(p[0])) } }), T));
+      slides.push(cardOrderSlide(J.cards, "詞卡排句1"), cardOrderSlide(J.cards2, "詞卡排句2"));
+      { const p = produce({ modes: ["say", "type"], label: "換一個詞說說看", answer: J.baseRef, check: t => /假如.+就/.test(t) ? { st: "check", msg: "老師會再看看" } : { st: "no", msg: "要用到「假如」和「就」" } });
+        slides.push(slide("", kick("⑥ 換一個詞說說看"), el("div", { class: "stem big-line" }, J.baseSay.stem), el("div", { class: "inst" }, J.baseSay.ask), p)); }
+      slides.push(slide("", kick("⑦ 參考例句"), el("div", { class: "refcard big-line" }, esc(J.baseRef)), sayBtn(J.baseRef, "唸例句")));
     }
-    const secs = [{ name: "假如……就……", hint: T === "base" ? "看示範 → 換情況 → 換情況和做什麼 → 排排看" : "看示範 → 仿寫 → 替換 → 補完 → 自己造句 → 接成兩句", slides, seq: true }];
+    const secs = [{ name: "假如……就……", hint: T === "base" ? "看示範 → 找情況 → 換情況 → 換情況和做什麼 → 排排看 → 說說看" : "看示範 → 找情況 → 仿寫 → 替換 → 補完 → 自己造句 → 接成兩句", slides, seq: true }];
     if (T !== "base") {
-      const B = L.bd;
-      const bd1 = slide("", kick("看示範"), el("div", { class: "stem big-line" }, B.demo.replace("不但", '<b class="kw">不但</b>').replace("更", '<b class="kw">更</b>')), el("div", { class: "hint" }, "「更」後面說的，要比前面更進一步。"), sayBtn(B.demo, "唸句子"));
-      const w2 = writeBox("不但……更……：仿寫"); w2.querySelector("textarea").value = B.copy.pre;
-      const bd2 = slide("", kick("仿寫"), el("div", { class: "stem big-line" }, `${B.copy.pre}〔　〕。`), w2, refBox(esc(B.copy.pre + B.copy.ref + "。")));
-      const w3 = writeBox("不但……更……：自己造句"); const c3 = el("div", { class: "selfck only-stu" }); c3.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["有用到「不但」和「更」", "「更」後面比前面更進一步", "有標點符號"]));
-      const bd3 = slide("", kick("自己造句"), el("div", { class: "stem" }, "用「不但……更……」自己造一句。"), w3, c3, refBox(esc(B.ownRef)));
-      secs.push({ name: "不但……更……", slides: [bd1, bd2, bd3], seq: true });
+      const bd1 = slide("", kick("① 看示範"), el("div", { class: "blocks" }, `<span class="blk b2">雙峰塔</span><span class="blk b1">不但是大型商場</span><span class="blk b3">更是吉隆坡最亮眼的建築</span>`), el("div", { class: "stem big-line" }, B.demo.replace("不但", '<b class="kw">不但</b>').replace("更", '<b class="kw">更</b>')), el("div", { class: "hint" }, "「更」後面說的，要比前面更進一步、更厲害。"), sayBtn(B.demo, "唸句子"));
+      const bj = B.judge.map((x, i) => { const c = choiceQ(`${x.pre}〔　〕。哪一個接在「更」後面最合適？`, x.opts, 0, `不但更：哪一句更進一步${i + 1}`); const s = slide("", kick("② 哪一句更進一步？"), sayRow(c), c); s.reveal = c.reveal; return s; });
+      const bd3 = slide("", kick("③ 仿寫"), el("div", { class: "stem big-line" }, `${B.copy.pre}〔　　〕。`), ideaBox("不但更：仿寫", B.copy.pre, "", B.copy.ideas));
+      const w4 = writeBox("不但……更……：自己造句"); const c4 = el("div", { class: "selfck only-stu" }); c4.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["有用到「不但」和「更」", "「更」後面比前面更進一步", "有標點符號"]));
+      const bd4 = slide("", kick("④ 自己造句"), el("div", { class: "inst" }, "💡 想一個人或東西的兩個優點，第二個要更厲害。"), w4, c4, refBox(esc(B.ownRef)));
+      secs.push({ name: "不但……更……", slides: [bd1, ...bj, bd3, bd4], seq: true });
       secs.push({ name: "照樣寫", hint: "照著課文的句子，換上自己的詞。", slides: L.phrase.map((p, i) => phraseSlide(p, i)) });
     }
     if (T !== "proj") secs.push({ name: "完成", slides: [finishSlide()] });

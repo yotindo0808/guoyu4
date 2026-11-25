@@ -1356,3 +1356,18 @@ html.proj .cslide.teach .cimg .row img { width: 6.5em; }
 .zcr { min-width: 0; font-size: 20px; }
 .zcr .pmodes button { font-size: 20px; padding: 6px 16px; }
 @media (orientation: portrait) { .zcgrid { grid-template-columns: 1fr; } .zct { font-size: clamp(80px, 14vh, 150px); } }
+/* ── 句子鷹架（第二版） ── */
+.demos { display: grid; gap: 14px; }
+.demo1 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.findline .seg { font: inherit; padding: 2px 6px; margin: 0 2px; border: 2px dashed var(--line); border-radius: 10px; background: transparent; color: inherit; cursor: pointer; }
+.findline .seg.blk { border-style: solid; }
+.ownrow { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 1.1em; }
+.ownin { font-family: var(--cjk); font-size: 1.1em; padding: 6px 10px; border: 2px solid var(--line); border-radius: 10px; width: 12em; }
+.ideas2 { align-items: center; }
+.ideai { font-size: 1.3em; }
+.ownbox { margin-top: 12px; }
+.sitcards { display: flex; flex-wrap: wrap; gap: 10px; margin: .4em 0; }
+.sitc { display: grid; gap: 2px; text-align: left; padding: 8px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; cursor: pointer; }
+.sitc b { color: var(--accent); }
+.sitc span { font-size: .85em; color: var(--muted); }
+.sitc.on { border-color: var(--accent); background: var(--accent-soft, #e3f1ee); }
