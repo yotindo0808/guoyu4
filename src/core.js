@@ -1051,9 +1051,9 @@ function inkOverlap(ch, sg, size) {
   let tn = 0, tc = 0, sn = 0, sc = 0; for (let i = 0; i < N * N; i++) { if (T[i]) { tn++; if (near(S, i)) tc++; } if (S[i]) { sn++; if (near(T, i)) sc++; } }
   return { cover: tn ? tc / tn : 0, prec: sn ? sc / sn : 0 };
 }
-function writeTask(c, onDone) {
+function writeTask(c, onDone, o = {}) {
   const q = qid(`寫國字：${c.c}`); const box = el("div", { class: "ptask" });
-  const size = Math.max(160, Math.min(240, Math.floor(innerHeight * .27)));
+  const size = o.size || Math.max(160, Math.min(240, Math.floor(innerHeight * .27)));
   const cv = el("canvas", { width: String(size * 2), height: String(size * 2), "aria-label": "寫字格，用手指或觸控筆寫" }); cv.style.width = cv.style.height = size + "px"; cv.style.touchAction = "none";
   const g = cv.getContext("2d"); g.scale(2, 2); const sk = document.createElement("canvas"); sk.width = sk.height = size; const sg = sk.getContext("2d");
   let guide = false, ink = [], stroke = null, t0 = 0, done = false;
@@ -1128,6 +1128,32 @@ function charPractice(c, i) {
   const head = el("div", { class: "cphead" });
   const sb = sayBtn(say, "唸給我聽"); sb.classList.add("bigsay");
   head.append(sb, el("span", { class: "cpw" }, c.pwh.replace("□", '<span class="cpb">□</span>')), el("span", { class: "hint" }, "聽一聽，寫出□裡的字。"));
+  if (GRADE === "四年級") {
+    /* 四年級：寫國字＋拼注音放同一頁，部首另一頁；畫面太矮時（10 吋平板）國字、注音再分開，一次做一件 */
+    wrap.classList.add("cp2"); let tight = null, cur = 0, groups = [];
+    const zt = zhuyinTask(c, () => mark()); let wt = null;
+    const rt = radicalTask(c, () => mark());
+    const p1 = el("div", { class: "cpp1" }), p2 = el("div", { class: "cpp2" }); p2.append(rt);
+    const steps = el("span", { class: "cpsteps" }); head.append(steps);
+    const done = t => t && t.classList.contains("pdone");
+    function mark() { fin(); paintSteps(); const g = groups[cur]; if (g && g.every(done) && cur < groups.length - 1) setTimeout(() => go(cur + 1), 900); }
+    function paintSteps() { [...steps.children].forEach((b, k) => { b.classList.toggle("on", k === cur); b.classList.toggle("ok", groups[k].every(done)); }); }
+    function go(k) { cur = k; const g = groups[k]; [wt, zt].forEach(t => { if (t) t.hidden = !g.includes(t); }); p1.hidden = !g.some(t => t === wt || t === zt); p2.hidden = !g.includes(rt); p1.classList.toggle("one", g.length === 1); paintSteps(); }
+    const lay = () => { const st = wrap.closest(".dstage"); if (!st) return;
+      const top = (p1.hidden ? p2 : p1).getBoundingClientRect().top;
+      const av = Math.max(200, st.getBoundingClientRect().bottom - top - 10);
+      const t = av < 360;
+      if (t !== tight) { tight = t; groups = t ? [[null], [zt], [rt]] : [[null, zt], [rt]]; steps.innerHTML = "";
+        (t ? ["① 國字", "② 注音", "③ 部首"] : ["① 國字＋注音", "② 部首"]).forEach((n, k) => { const b = el("button", { type: "button", class: "cpstep" }, n); b.onclick = () => go(k); steps.append(b); }); }
+      const sz = Math.max(180, Math.min(440, Math.floor(Math.min(av - 90, innerWidth * (t ? .6 : .36)))));
+      if (!wt || (wt._sz !== sz && !done(wt))) { const nw = writeTask(c, () => mark(), { size: sz }); nw._sz = sz; if (wt) wt.replaceWith(nw); else p1.prepend(nw); wt = nw; }
+      groups[0][0] = wt;
+      const rows = t ? 7.2 : 6.3, extra = t ? 40 : 110;
+      wrap.style.setProperty("--kh", Math.max(26, Math.min(70, Math.floor((av - extra) / rows - 6))) + "px");
+      go(Math.min(cur, groups.length - 1)); };
+    p1.append(zt); wrap.append(head, p1, p2);
+    const sl = slide("cps", wrap); sl.dataset.nofit = "1"; sl.onshow = () => requestAnimationFrame(lay); addEventListener("resize", () => { if (wrap.isConnected) { tight = null; lay(); } }); return sl;
+  }
   const tasks = el("div", { class: "cptasks" }); tasks.append(writeTask(c, fin), zhuyinTask(c, fin), radicalTask(c, fin));
   wrap.append(head, tasks);
   return slide("cps", wrap);

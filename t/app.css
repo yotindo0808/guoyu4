@@ -1302,6 +1302,52 @@ html.proj .cslide.teach .cimg .row img { width: 6.5em; }
 .bgt { font-size: 1.15em; margin: 0 0 .3em; }
 .bgtop { grid-template-columns: minmax(0, 32%) minmax(0, 1fr); }
 .bgq { margin-top: .3em; }
+/* ── 四年級生字練習：分兩步、放大（10 吋平板） ── */
+.cp2 .cphead { gap: 10px; }
+.cpsteps { display: flex; gap: 8px; margin-left: auto; }
+.cpstep { font-family: var(--ui); font-size: .95em; padding: .3em .9em; border-radius: 999px; border: 2px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.cpstep.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cpstep.ok::after { content: " √"; }
+.cp2.st1 .cpp2, .cp2.st2 .cpp1 { display: none; }
+.cpp1 { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: stretch; }
+.cpp1 .ptask { justify-content: flex-start; }
+.cpp1 .ptask .btn { font-size: 1.05em; padding: .35em .9em; }
+.cp2 .zkb { width: 100%; gap: 6px; }
+.cp2 .zrow { display: flex; flex-wrap: nowrap; gap: 6px; justify-content: center; width: 100%; }
+.cp2 .zk { flex: 0 0 calc((100% - 42px) / 8); min-width: 0; height: clamp(40px, 8vh, 66px); font-size: clamp(20px, 4vh, 32px); border-width: 2px; border-radius: 10px; }
+.cp2 .ztones .zk { flex: 1 1 0; height: clamp(48px, 9.5vh, 76px); }
+.cp2 .zkt small { font-size: .45em; }
+.cp2 .zans { font-size: clamp(26px, 5vh, 40px); min-width: 4em; }
+.cp2 .zansrow .btn { font-size: 1.05em; padding: .35em .9em; }
+.cpp2 { display: flex; justify-content: center; }
+.cpp2 .ptask { min-width: min(720px, 90%); padding: 18px; }
+.cpp2 .ropt { min-width: 6em; padding: 14px 18px; }
+.cpp2 .ropt .rg { font-size: 3.4em; }
+.cpp2 .ropt small { font-size: .9em; }
+.cp2 .zk { height: var(--kh, 56px); font-size: calc(var(--kh, 56px) * .5); }
+.cp2 .ztones .zk { height: calc(var(--kh, 56px) * 1.1); }
+.cp2 .zans { font-size: calc(var(--kh, 56px) * .62); }
+.cp2 .phead { font-size: .85em; }
+.cp2 .ptask { padding: 6px 10px; gap: 6px; }
+.cp2 .cphead { min-height: 0; }
+.cp2 .cphead .bigsay { transform: none; }
+@media (max-height: 700px) {
+  html:not(.proj) .dtop .dhint { display: none; }
+  html:not(.proj) .dbot .dot { width: 28px; height: 28px; font-size: 14px; min-width: 0; padding: 0; }
+  html:not(.proj) .dbot .nav { padding: 6px 14px; }
+  html:not(.proj) .cpr { gap: 4px; }
+}
+@media (max-height: 700px) {
+  html:not(.proj) .dbot.wide { flex-wrap: nowrap; }
+  html:not(.proj) .dbot.wide .dots { order: 0; flex-basis: auto; }
+  html:not(.proj) .dot.char { min-width: 28px; height: 28px; font-size: 14px; }
+  html:not(.proj) .prog { font-size: 12px; }
+  html:not(.proj) .deck { gap: 4px; }
+}
+.cp2 .cpp1[hidden], .cp2 .cpp2[hidden], .cp2 .ptask[hidden] { display: none; }
+.cpp1.one { grid-template-columns: 1fr; justify-items: center; }
+.cpp1.one .ptask { width: min(100%, 900px); }
+.cp2.st1 .cpp2, .cp2.st2 .cpp1 { display: revert; }
 
 
 .lockp{display:block;padding:14px 18px;border:2px dashed #c9b28a;border-radius:12px;background:#fffaf0;color:#6b5a3a;line-height:1.8}
