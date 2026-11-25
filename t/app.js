@@ -918,7 +918,7 @@ function deck(sections, o = {}) {
       const qs = x.slides.map((v, k) => [v, k]).filter(([v]) => isQ(v)); if (!qs.length) return;
       const row = el("div", { class: "frow" }); row.append(el("span", { class: "fname" }, x.name));
       const ds = el("div", { class: "fdots" });
-      qs.forEach(([v, k], n) => { const st = status(v); const d = el("button", { type: "button", class: "dot" + (x.dotChars ? " char" : "") + (st ? " " + st : ""), "aria-label": `${x.name}第${n + 1}題` }, x.dotChars ? x.dotChars[k] : String(n + 1)); d.onclick = () => go(si, k); ds.append(d); });
+      qs.forEach(([v, k], n) => { const st = status(v); const d = el("button", { type: "button", class: "dot" + (st ? " " + st : ""), "aria-label": `${x.name}第${n + 1}題` }, String(n + 1)); d.onclick = () => go(si, k); ds.append(d); });
       row.append(ds); box.append(row);
     });
   }
@@ -927,7 +927,7 @@ function deck(sections, o = {}) {
     prog.hidden = !all.length; prog.querySelector("i").style.width = (all.length ? done / all.length * 100 : 0) + "%"; prog.querySelector("span").textContent = `已完成 ${done} / ${all.length} 題`;
     const s = sections[pos.s];
     const cd = dots.children[pos.i]; if (cd && dots.scrollWidth > dots.clientWidth) dots.scrollLeft = cd.offsetLeft - dots.clientWidth / 2;
-    [...dots.children].forEach((d, i) => { const sl = s.slides[i]; const st = status(sl); d.className = "dot" + (s.dotChars ? " char" : "") + (st ? " " + st : (seen.has(sl) ? " seen" : "")); d.setAttribute("aria-current", String(i === pos.i)); });
+    [...dots.children].forEach((d, i) => { const sl = s.slides[i]; const st = status(sl); d.className = "dot" + (s.dotChars && proj() ? " char" : "") + (st ? " " + st : (seen.has(sl) ? " seen" : "")); d.setAttribute("aria-current", String(i === pos.i)); });
   }
   function go(si, i) {
     { const ep = document.querySelector(".expop"); if (ep) ep.remove(); }
@@ -937,7 +937,7 @@ function deck(sections, o = {}) {
     hint.innerHTML = ""; if (s.hint) { hint.append(sayBtn(() => plainText(s.hint), "唸說明")); hint.insertAdjacentHTML("beforeend", " " + s.hint); }
     extra.innerHTML = ""; if (s.extra) [].concat(s.extra).forEach(x => extra.append(x));
     dots.innerHTML = "";
-    if (s.slides.length > 1) s.slides.forEach((x, k) => { const d = el("button", { type: "button", class: "dot", "aria-label": `第${k + 1}個` }, s.dotChars ? s.dotChars[k] : String(k + 1)); d.onclick = () => go(si, k); dots.append(d); });
+    if (s.slides.length > 1) s.slides.forEach((x, k) => { const d = el("button", { type: "button", class: "dot", "aria-label": `第${k + 1}個` }, s.dotChars && proj() ? s.dotChars[k] : String(k + 1)); d.onclick = () => go(si, k); dots.append(d); });
     const wbase = innerWidth + "x" + innerHeight + document.documentElement.className;
     bot.classList.toggle("wide", s._wideAt === wbase && !!s._wide);
     const fkey = wbase + (bot.classList.contains("wide") ? "|w" : "");
