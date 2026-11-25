@@ -1348,3 +1348,11 @@ html.proj .cslide.teach .cimg .row img { width: 6.5em; }
 .cpp1.one { grid-template-columns: 1fr; justify-items: center; }
 .cpp1.one .ptask { width: min(100%, 900px); }
 .cp2.st1 .cpp2, .cp2.st2 .cpp1 { display: revert; }
+/* 自己造詞：左字右作答 */
+.zcgrid { display: grid; grid-template-columns: minmax(220px, 30%) minmax(0, 1fr); gap: 18px; align-items: start; height: 100%; }
+.zcl { display: grid; justify-items: center; gap: 10px; padding-top: 8px; text-align: center; }
+.zct { font-family: var(--lf), var(--cjk); font-size: clamp(90px, 22vh, 180px); line-height: 1.1; color: var(--accent); }
+.zch { font-size: 22px; line-height: 1.7; }
+.zcr { min-width: 0; font-size: 20px; }
+.zcr .pmodes button { font-size: 20px; padding: 6px 16px; }
+@media (orientation: portrait) { .zcgrid { grid-template-columns: 1fr; } .zct { font-size: clamp(80px, 14vh, 150px); } }

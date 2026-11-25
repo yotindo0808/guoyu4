@@ -1780,7 +1780,10 @@ const VIEWS = {
     const ps = L.cards.map(c => { const s = charPractice(Object.assign({}, c, { pw: c.word, pwh: c.pwh }), 0); return s; });
     const zc = L.cards.map(c => { const p = produce({ label: `自己造詞：${c.c}`, answer: c.zc.join("、"), hint: `想想生活中哪些詞有「${c.c}」`,
       check: t => !t.includes(c.c) ? { st: "no", msg: `要用到「${c.c}」這個󠇡字` } : (t === c.word ? { st: "no", msg: "這是課本的詞，換一󠇡個󠇡自己想的詞" } : (c.zc.includes(t) ? { st: "ok" } : { st: "check", msg: "老師會再確認這個󠇡詞" })) });
-      return slide("", el("div", { class: "flash" }, `<span class="tag">自己造詞</span><div class="t nozy">${c.c}</div><div class="hint">課本的詞：${c.word}</div>`), el("div", { class: "hint", style: "text-align:center" }, `用「${c.c}」造一󠇡個󠇡課本以外的詞。`), p); });
+      /* 左右兩欄：左邊生字與提示固定大小，右邊作答區；不跟著作答區縮放 */
+      const lf = el("div", { class: "zcl" }, `<div class="zct nozy">${c.c}</div><div class="zch">課本的詞：${c.word}</div><div class="zch">用「${c.c}」造一󠇡個󠇡課本以外的詞。</div>`);
+      const g = el("div", { class: "zcgrid" }); const rt = el("div", { class: "zcr" }); rt.append(p); g.append(lf, rt);
+      const sl = slide("zcs", g); sl.dataset.nofit = "1"; return sl; });
     return deck([{ group: "生字", name: "生字練習", hint: "每個󠇡生字要完成三件事：寫國字、拼注音、選部首。", slides: ps, dotChars: L.cards.map(c => c.c) }, { name: "自己造詞", slides: zc, dotChars: L.cards.map(c => c.c) }, { name: "完成", slides: [finishSlide()] }], { submit: true });
   },
 
