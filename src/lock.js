@@ -21,7 +21,10 @@ async function openWithKey(key) {
   const ids = Object.keys(LESSONS).filter(id => LESSONS[id]);
   if (!ids.length) { const j = await (await fetch(`${LBASE}${LIST[0][0]}/sealed.json`)).json(); await crypto.subtle.decrypt({ name: "AES-GCM", iv: ub(j.i) }, key, ub(j.c)); }
   for (const id of ids) await openLesson(id, key);
-  KEY = key; UNLOCKED = true; paintLockBtn();
+  KEY = key; UNLOCKED = true;
+  /* 驗證鑰匙期間才載入完成的課次（重新整理頁面時常見）也要打開 */
+  for (const id of Object.keys(LESSONS).filter(id => LESSONS[id] && !LESSONS[id]._open)) { try { await openLesson(id, key); } catch (e) {} }
+  paintLockBtn();
   if (page() === "lesson") render();
 }
 function relock() {

@@ -193,3 +193,26 @@ ART["gucoin"] = svg('<circle cx="80" cy="60" r="44" fill="#e8b93a" stroke="#b886
                     + '<rect x="66" y="46" width="28" height="28" fill="#fff8e1" stroke="#b8860b" stroke-width="3"/>', bg="#fff8e1")
 ART["heart"] = svg('<path d="M80 100 C30 70 30 28 58 26 C70 25 78 34 80 40 C82 34 90 25 102 26 C130 28 130 70 80 100 Z" fill="#e8546a"/>', bg="#fdeef0")
 ART["star"] = svg('<polygon points="80,14 92,46 126,48 99,68 108,102 80,82 52,102 61,68 34,48 68,46" fill="#ffcf3d" stroke="#e0a800" stroke-width="3"/>', bg="#eef3fb")
+# 生字字義圖（阻、尼、器、吉各自依字義）
+ART["roadblock"] = svg('<rect x="0" y="80" width="160" height="40" fill="#8d98a3"/><line x1="0" y1="100" x2="160" y2="100" stroke="#fff" stroke-width="2" stroke-dasharray="10 8"/>'
+                       '<rect x="14" y="84" width="40" height="18" rx="5" fill="#4a90d9"/><rect x="22" y="76" width="22" height="10" rx="3" fill="#7fb3e6"/><circle cx="24" cy="103" r="5" fill="#333"/><circle cx="46" cy="103" r="5" fill="#333"/>'
+                       '<rect x="74" y="64" width="6" height="40" fill="#555"/><rect x="132" y="64" width="6" height="40" fill="#555"/>'
+                       '<rect x="68" y="56" width="76" height="16" fill="#fff" stroke="#c0392b" stroke-width="2"/>'
+                       + "".join(f'<polygon points="{x},56 {x + 10},56 {x + 2},72 {x - 8},72" fill="#e0453a"/>' for x in (76, 96, 116, 136))
+                       + '<circle cx="106" cy="30" r="18" fill="#fff" stroke="#e0453a" stroke-width="5"/><rect x="96" y="27" width="20" height="6" fill="#e0453a"/>', bg="#eef3f6")
+ART["raincoat"] = svg('<path d="M80 14 Q60 14 58 36 L40 104 L120 104 L102 36 Q100 14 80 14 Z" fill="#ffd84d" stroke="#d1a800" stroke-width="2"/>'
+                      '<ellipse cx="80" cy="34" rx="14" ry="13" fill="#f6d2b0"/><path d="M66 32 Q80 12 94 32" fill="#ffd84d"/><circle cx="75" cy="35" r="1.4" fill="#333"/><circle cx="85" cy="35" r="1.4" fill="#333"/><path d="M76 40 Q80 43 84 40" stroke="#b5533c" stroke-width="1.2" fill="none"/>'
+                      '<line x1="80" y1="50" x2="80" y2="104" stroke="#d1a800" stroke-width="1.5"/>' + "".join(f'<circle cx="84" cy="{y}" r="2" fill="#d1a800"/>' for y in (60, 74, 88))
+                      + "".join(f'<line x1="{x}" y1="{y}" x2="{x - 3}" y2="{y + 9}" stroke="#4a90d9" stroke-width="2.4" stroke-linecap="round"/>' for x, y in [(22, 20), (36, 50), (18, 78), (132, 24), (146, 56), (138, 86), (120, 8)]), bg="#dde8f0")
+ART["instruments"] = svg('<rect x="0" y="104" width="160" height="16" fill="#e8dcc4"/>'
+                         '<ellipse cx="44" cy="70" rx="30" ry="10" fill="#e0453a"/><rect x="14" y="70" width="60" height="30" fill="#e0453a"/><ellipse cx="44" cy="100" rx="30" ry="10" fill="#b92f26"/><ellipse cx="44" cy="70" rx="30" ry="10" fill="#fdf3e0" stroke="#b92f26" stroke-width="2"/>'
+                         + "".join(f'<line x1="{x}" y1="74" x2="{x + 10}" y2="98" stroke="#ffd84d" stroke-width="2"/>' for x in (18, 34, 50))
+                         + '<line x1="30" y1="40" x2="40" y2="66" stroke="#8a5a33" stroke-width="3" stroke-linecap="round"/><line x1="62" y1="40" x2="52" y2="66" stroke="#8a5a33" stroke-width="3" stroke-linecap="round"/>'
+                         '<path d="M112 46 Q98 46 100 62 Q102 72 98 82 Q96 100 116 102 Q136 100 134 82 Q130 72 132 62 Q134 46 120 46 Z" fill="#b8651e" stroke="#7a3f10" stroke-width="2"/>'
+                         '<rect x="113" y="12" width="6" height="40" fill="#5a3a1a"/><rect x="110" y="8" width="12" height="8" rx="2" fill="#5a3a1a"/>'
+                         + "".join(f'<line x1="{x}" y1="14" x2="{x}" y2="94" stroke="#f0e6d0" stroke-width=".8"/>' for x in (114, 116, 118))
+                         + '<path d="M110 70 q3 3 0 6 M122 70 q-3 3 0 6" stroke="#3b1f08" stroke-width="1.5" fill="none"/><rect x="108" y="88" width="16" height="3" fill="#3b1f08"/>', bg="#fbf3e6")
+ART["luckybag"] = svg('<rect x="0" y="0" width="160" height="120" fill="#fbeee4"/>'
+                      '<rect x="20" y="20" width="56" height="84" rx="4" fill="#e0453a"/><path d="M20 24 L48 44 L76 24" fill="#c9302c"/><circle cx="48" cy="62" r="14" fill="#f2c14e"/><text x="48" y="69" font-size="18" text-anchor="middle" fill="#c9302c" font-weight="bold">吉</text>'
+                      '<rect x="92" y="34" width="50" height="50" fill="#e0453a" transform="rotate(45 117 59)"/><circle cx="117" cy="59" r="12" fill="none" stroke="#f2c14e" stroke-width="3"/><circle cx="117" cy="59" r="4" fill="#f2c14e"/>'
+                      '<path d="M117 18 v10" stroke="#e8b93c" stroke-width="2"/>')

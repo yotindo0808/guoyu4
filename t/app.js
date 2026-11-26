@@ -1452,7 +1452,7 @@ function famPickSlides(F) {
 
 /* ── 照樣寫：每個󠇡空󠇡格有詞庫，點詞放進空󠇡格，也可以自己打 ── */
 function phraseSlide(p, i) {
-  const w = writeBox(`照樣寫${i + 1}`); const ta = w.querySelector("textarea");
+  const w = writeBox(typeof i === "string" ? `照樣寫${i}` : `照樣寫${i + 1}`); const ta = w.querySelector("textarea");
   const line = el("div", { class: "stem big-line" }); const blanks = [];
   p.stem.forEach(x => { if (x === 0) { const b = el("span", { class: "pblank" }, "〔　〕"); blanks.push(b); line.append(b); } else line.append(x); });
   const banks = el("div", { class: "pbanks" });
@@ -1766,7 +1766,11 @@ const VIEWS = {
         if (zl) { const j = el("button", { type: "button", class: "btn zxjump", title: "到字音字形教學", "aria-label": "到字音字形教學" }, "🔗");
           j.onclick = () => { BACK = { tab: "chars", sec: 0, i: ci, c: c.c }; jumpTo("zx", zxSecName(zl)); }; acts.append(j); }
         left.append(acts);
-        if (must.has(c.c)) left.append(el("div", { class: "mustnote" }, "★"));
+        const cp = (L.cpic || {})[c.c];
+        if (cp) { const pb = el("button", { type: "button", class: "cpic", "aria-label": "字義圖，按一󠇡下顯示詞語" }, pic(cp[0], ""));
+          const cap = el("span", { class: "cpcap", hidden: "" }, cp[1].split(c.c).join(`<b class="kw">${c.c}</b>`)); pb.append(cap);
+          pb.onclick = () => { cap.hidden = !cap.hidden; }; left.append(pb); }
+        if (must.has(c.c)) acts.append(el("span", { class: "mustnote" }, "★"));
         /* 右：造詞網（字在前一󠇡列、字在後一󠇡列），最下面加自己想的詞 */
         const right = el("div", { class: "cteach" });
         const net = el("div", { class: "znet" });
@@ -1885,15 +1889,15 @@ const VIEWS = {
       const d = el("div"); d.append(bank, el("div", { class: "inst" }, "點一󠇢張想法卡，或在下面自己打、自己改："), w); return d;
     };
     /* 按出句子󠇡裡的「情況」 */
-    const findSlide = (parts, i, title) => {
+    const findSlide = (parts, i, title, tgt = 1, what = "情況", tip = "情況是「假如」後面說的事。", lg = legend) => {
       const q = qid(`認識結構${i + 1}`); const line = el("div", { class: "stem big-line findline" }); const msg = el("div", { class: "segmsg", "aria-live": "polite" }); let done = false;
       parts.forEach((t, k) => { if (/^[，。]$/.test(t) || k === 0 && t === "假如") { line.append(t); return; }
-        const b = el("button", { type: "button", class: "seg" }, t); b.onclick = () => { if (done) return; const ok = k === 1; if (!proj()) logAns(q, ok, t);
-          if (ok) { done = true; b.classList.add("blk", "b1"); msg.innerHTML = '<span class="okmsg">√ 對！這是「情況」。</span>'; root.classList.add("answered"); }
-          else { b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 400); msg.innerHTML = '<span class="nomsg">這不󠇡是情況。情況是「假如」後面說的事。</span>'; } }; line.append(b); });
+        const b = el("button", { type: "button", class: "seg" }, t); b.onclick = () => { if (done) return; const ok = k === tgt; if (!proj()) logAns(q, ok, t);
+          if (ok) { done = true; b.classList.add("blk", "b1"); msg.innerHTML = `<span class="okmsg">√ 對！這是「${what}」。</span>`; root.classList.add("answered"); }
+          else { b.classList.add("shake"); setTimeout(() => b.classList.remove("shake"), 400); msg.innerHTML = `<span class="nomsg">這不󠇡是${what}。${tip}</span>`; } }; line.append(b); });
       const root = el("div"); root.append(line, msg);
-      const s = slide("", kick(title), el("div", { class: "inst" }, "按出句子󠇡裡的「情況」。"), legend(), root, sayBtn(parts.join(""), "唸句子󠇡"));
-      s.reveal = () => { line.querySelectorAll(".seg")[0].classList.add("blk", "b1"); }; return s;
+      const s = slide("", kick(title), el("div", { class: "inst" }, `按出句子󠇡裡的「${what}」。`), lg(), root, sayBtn(parts.join(""), "唸句子󠇡"));
+      s.reveal = () => { const bs = [...line.querySelectorAll(".seg")]; const b = bs.find(x => x.textContent === parts[tgt]); if (b) b.classList.add("blk", "b1"); }; return s;
     };
     /* 只換情況（點選＋自己打） */
     const swapSit = (opts, title) => {
@@ -1926,10 +1930,6 @@ const VIEWS = {
         J.s5cards.forEach(([h, eg]) => { const c = el("button", { type: "button", class: "sitc" }, `<b>${h}</b><span>${eg}</span>`); c.onclick = () => { cards.querySelectorAll(".sitc").forEach(x => x.classList.remove("on")); c.classList.add("on"); }; cards.append(c); });
         const c = el("div", { class: "selfck only-stu" }); c.append(el("div", { class: "hint" }, "寫完檢查："), checklist(ck));
         slides.push(slide("", kick("⑥ 自己造句"), el("div", { class: "inst" }, "先選一󠇢張情況卡想一󠇢想，再寫出完整的句子󠇡（可以打字、手寫或用說的）。"), cards, w, c, refBox(esc(J.s5ref)))); }
-      /* ⑦ 接成兩句 */
-      { const w = writeBox("⑦ 接成兩句"); w.querySelector("textarea").placeholder = "假如……，我就……。我會先……，再……。";
-        const c = el("div", { class: "selfck only-stu" }); c.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["第一句用到「假如……就……」", "第二句用「先……再……」說怎麼做", "兩句都有標點符號"]));
-        slides.push(slide("", kick("⑦ 接成兩句"), el("div", { class: "stem" }, "句框：假如……，我就……。<br>我會先……，再……。"), w, c, refBox(esc(J.s6ref)))); }
     } else {
       /* 基礎層 */
       const ex = el("div", { class: "demos" }); J.demos.slice(0, 2).forEach(d => { const r = el("div", { class: "demo1" }); r.append(blocks(d), sayBtn(sent(d), "唸句子󠇡")); ex.append(r); });
@@ -1942,15 +1942,39 @@ const VIEWS = {
         slides.push(slide("", kick("⑥ 換一󠇡個󠇡詞說說看"), el("div", { class: "stem big-line" }, J.baseSay.stem), el("div", { class: "inst" }, J.baseSay.ask), p)); }
       slides.push(slide("", kick("⑦ 參考例句"), el("div", { class: "refcard big-line" }, esc(J.baseRef)), sayBtn(J.baseRef, "唸例句")));
     }
-    const secs = [{ name: "假如……就……", hint: T === "base" ? "看示範 → 找情況 → 換情況 → 換情況和做什麼 → 排排看 → 說說看" : "看示範 → 找情況 → 仿寫 → 替換 → 補完 → 自己造句 → 接成兩句", slides, seq: true }];
+    const secs = [{ name: "假如……就……", hint: T === "base" ? "看示範 → 找情況 → 換情況 → 換情況和做什麼 → 排排看 → 說說看" : "看示範 → 找情況 → 仿寫 → 替換 → 補完 → 自己造句", slides, seq: true }];
     if (T !== "base") {
-      const bd1 = slide("", kick("① 看示範"), el("div", { class: "blocks" }, `<span class="blk b2">雙峰塔</span><span class="blk b1">不󠇡但是大型商場</span><span class="blk b3">更是吉隆坡最亮眼的建築</span>`), el("div", { class: "stem big-line" }, B.demo.replace("不󠇡但", '<b class="kw">不󠇡但</b>').replace("更", '<b class="kw">更</b>')), el("div", { class: "hint" }, "「更」後面說的，要比前面更進一󠇡步、更厲害。"), sayBtn(B.demo, "唸句子󠇡"));
-      const bj = B.judge.map((x, i) => { const c = choiceQ(`${x.pre}〔　〕。哪一󠇡個󠇡接在「更」後面最合適？`, x.opts, 0, `不󠇡但更：哪一󠇡句更進一󠇡步${i + 1}`); const s = slide("", kick("② 哪一󠇡句更進一󠇡步？"), sayRow(c), c); s.reveal = c.reveal; return s; });
-      const bd3 = slide("", kick("③ 仿寫"), el("div", { class: "stem big-line" }, `${B.copy.pre}〔　　〕。`), ideaBox("不󠇡但更：仿寫", B.copy.pre, "", B.copy.ideas));
-      const w4 = writeBox("不󠇡但……更……：自己造句"); const c4 = el("div", { class: "selfck only-stu" }); c4.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["有用到「不󠇡但」和「更」", "「更」後面比前面更進一󠇡步", "有標點符號"]));
-      const bd4 = slide("", kick("④ 自己造句"), el("div", { class: "inst" }, "💡 想一󠇡個󠇡人或東西󠇡的兩個優點，第二個要更厲害。"), w4, c4, refBox(esc(B.ownRef)));
-      secs.push({ name: "不󠇡但……更……", slides: [bd1, ...bj, bd3, bd4], seq: true });
-      secs.push({ name: "照樣寫", hint: "照著課文的句子󠇡，換上自己的詞。", slides: L.phrase.map((p, i) => phraseSlide(p, i)) });
+      /* 不󠇡但……更……：和「假如……就……」一󠇡樣分步搭鷹架 */
+      const blk3 = (arr, cols) => { const d = el("div", { class: "blocks" }); arr.forEach((t, k) => d.append(el("span", { class: "blk " + cols[k] }, t))); return d; };
+      const BC = ["b2", "b1", "b3"]; const bLeg = () => blk3(B.blocks, BC);
+      const bsent = a => `${a[0]}${a[1]}，${a[2]}。`;
+      const bex = el("div", { class: "demos" }); B.demos.forEach(d => { const r = el("div", { class: "demo1" }); r.append(blk3(d, BC), sayBtn(bsent(d), "唸句子󠇡")); bex.append(r); });
+      const bs = [slide("", kick("① 看示範"), bLeg(), bex, el("div", { class: "hint" }, "「更」後面說的，要比前面更進一󠇡步、更厲害。"))];
+      B.find.forEach((f, i) => bs.push(findSlide(f, i, "② 找一󠇢找", 3, "更厲害的事", "「更」後面說的才是更厲害的事。", bLeg)));
+      B.judge.forEach((x, i) => { const c = choiceQ(`${x.pre}〔　〕。哪一󠇡個󠇡接在「更」後面最合適？`, x.opts, 0, `不󠇡但更：哪一󠇡句更進一󠇡步${i + 1}`); const s = slide("", kick("③ 哪一󠇡句更進一󠇡步？"), sayRow(c), c); s.reveal = c.reveal; bs.push(s); });
+      { const x = B.swap1; const q = qid("④ 不󠇡但更：換「更」的部分"); const line = el("div", { class: "stem big-line" }); const paint = t => { line.innerHTML = `${x.pre}<span class="slot2 b3">${t || "更厲害的事"}</span>。`; }; paint();
+        const bank = el("div", { class: "bank" }); x.opts.forEach(t => { const c = el("button", { type: "button", class: "chip" }, t); c.onclick = () => { paint(t); if (!proj()) logText(q, x.pre + t + "。"); }; bank.append(c); });
+        const own = el("input", { type: "text", class: "ownin", placeholder: "自己打", "aria-label": "自己打", maxlength: "16" }); own.addEventListener("input", () => paint(own.value.trim())); own.addEventListener("change", () => { if (own.value.trim() && !proj()) logText(q, x.pre + own.value.trim() + "。"); });
+        const orow = el("div", { class: "ownrow" }, "✏️ "); orow.append(own);
+        bs.push(slide("", kick("④ 換「更」後面的事"), el("div", { class: "inst" }, "選一󠇡件更厲害的事放進句子󠇡，也可以自己打。"), bLeg(), line, bank, orow)); }
+      { const sw = swapSlide({ s3: { pairs: B.pairs } }, T, { pre: "他不󠇡但", mid: "，更", a: "第一件", b: "更厲害的事", title: "⑤ 配一󠇡配：「不󠇡但」和「更」" }); const w = writeBox("⑤ 不󠇡但更：自己組一󠇡句"); const d = el("div", { class: "ownbox" }); d.append(el("div", { class: "inst" }, "也可以自己打一󠇡句："), w); sw.querySelector(".combo").append(d); bs.push(sw); }
+      B.fill.forEach((x, i) => bs.push(slide("", kick("⑥ 補完句子󠇡"), el("div", { class: "stem big-line" }, `${x.pre}〔　　〕。`), ideaBox(`不󠇡但更：補完句子󠇡${i + 1}`, x.pre, "", x.ideas))));
+      { const w4 = writeBox("不󠇡但……更……：自己造句"); const cards = el("div", { class: "sitcards" });
+        B.cards.forEach(([h, eg]) => { const c = el("button", { type: "button", class: "sitc" }, `<b>${h}</b><span>${eg}</span>`); c.onclick = () => { cards.querySelectorAll(".sitc").forEach(z => z.classList.remove("on")); c.classList.add("on"); }; cards.append(c); });
+        const c4 = el("div", { class: "selfck only-stu" }); c4.append(el("div", { class: "hint" }, "寫完檢查："), checklist(["有用到「不󠇡但」和「更」", "「更」後面比前面更進一󠇡步", "有標點符號"]));
+        bs.push(slide("", kick("⑦ 自己造句"), el("div", { class: "inst" }, "💡 選一󠇢張卡，想它的兩個優點，第二個要更厲害。"), cards, w4, c4, refBox(esc(B.ownRef)))); }
+      secs.push({ name: "不󠇡但……更……", hint: "看示範 → 找一󠇢找 → 判斷 → 換一󠇡換 → 配一󠇡配 → 補完 → 自己造句", slides: bs, seq: true });
+      /* 照樣寫：看例子󠇡 → 選詞組合 → 判斷 → 自己寫 */
+      const ps = [];
+      L.phrase2.forEach((P, pi) => {
+        const cols = ["b2", "b1", "b3", "b4"].slice(0, P.blocks.length);
+        const ex = el("div", { class: "demos" }); [P.split, ...P.more].forEach(a => ex.append(blk3(a, cols)));
+        ps.push(slide("", kick(`${P.pat}：看例子󠇡`), blk3(P.blocks, cols), el("div", { class: "inst" }, `課文：${P.orig}`), ex));
+        P.items.forEach((it, i) => ps.push(phraseSlide(Object.assign({ pat: P.pat, orig: P.orig }, it), `${pi}-${i}`)));
+        P.judge.forEach((x, i) => { const c = choiceQ(`哪一󠇡個󠇡詞放進去最合適？<br>${x.q}`, x.opts, 0, `照樣寫判斷：${x.q}`); const s = slide("", kick(`${P.pat}：選一󠇢選`), sayRow(c), c); s.reveal = c.reveal; ps.push(s); });
+        { const w = writeBox(`照樣寫：${P.pat} 自己寫`); ps.push(slide("", kick(`${P.pat}：自己寫`), el("div", { class: "inst" }, P.own), w, refBox(esc(P.items[0].ref)))); }
+      });
+      secs.push({ name: "照樣寫", hint: "看例子󠇡 → 選詞組合 → 選一󠇢選 → 自己寫", slides: ps, seq: true });
     }
     if (T !== "proj") secs.push({ name: "完成", slides: [finishSlide()] });
     return deck(secs, { submit: T !== "proj" });
@@ -1974,19 +1998,49 @@ const VIEWS = {
       const s = L.rvb.map((x, i) => x.pics ? listenSlide(x.say, x.pics, 0, `綜合練習${i + 1}`, { html: y => pic(y[1], y[0]), cls: "lpic", stem: el("div", { class: "stem" }, x.q) }) : listenSlide(x.say, x.opts, 0, `綜合練習${i + 1}`, { cls: "bigc", stem: el("div", { class: "stem" }, mk(x.q)) }));
       return deck([{ name: "聽題點選", hint: "聽題目，按出答案。", slides: s }, { name: "完成", slides: [finishSlide()] }], { submit: true });
     }
-    const out = [];
-    L.rvs.forEach((x, i) => {
-      if (x.type === "write") x.items.forEach((it, k) => { const zyi = it[2]; const show = it.slice(0, 2).map((t, j) => j === zyi ? `<span class="ui zyk">${t}</span>` : nz(t)).join("");
-        const p = produce({ modes: ["write"], label: `寫國字：${it.slice(0, 2).join("")}`, answer: it[3], check: t => t === it[3] ? { st: "ok" } : { st: "no", msg: "不󠇡是這個󠇡字" } });
-        const s = slide("", kick(x.k), el("div", { class: "stem big-line" }, `寫出注音的國字：${show}`), p); s.reveal = p.reveal; out.push(s); });
-      else if (x.type === "fix") { out.push(fixSlide(x)); }
-      else if (x.type === "choice") { const poly = x.k === "多音字"; const c = choiceQ(poly ? x.q.replace(/(濟+)/g, m => nz(m)) : x.q, x.opts.map(o => poly ? `<span class="ui">${o}</span>` : o), x.ans, `${x.k}：${plainText(x.q)}`); const s = slide("", kick(x.k), poly ? null : sayRow(c), c); s.reveal = c.reveal; out.push(s); }
-      else if (x.type === "own") { const w = writeBox(`造句：${x.pat}`); out.push(slide("", kick(x.k), el("div", { class: "stem" }, `用「${x.pat}」造一󠇡句。`), w)); }
+    /* 照試卷原題出題，依大題分節 */
+    const ZY = t => `<span class="ui zyk">${t}</span>`;
+    const secs = L.exam.map(E => {
+      const k = E.sec; let sl = [];
+      if (E.type === "wz") sl = E.items.map((it, n) => {
+        const tgt = it.ask === "zy" ? `「${nz(it.t)}」` : `「${ZY(it.t)}」`;
+        const stem = el("div", { class: "stem big-line" }, `${n + 1}. ${it.pre}${tgt}${it.post}`);
+        const lab = `${k}${n + 1}：${it.pre}${it.t}${it.post}`;
+        if (it.ask === "zy") { const t = zhuyinTask({ c: it.t, cz: it.ans }, () => {}, { q: lab }); const s = slide("exzy", kick(k), el("div", { class: "inst" }, "寫出「」裡的注音。"), stem, t); s.dataset.nofit = "1"; return s; }
+        const p = produce({ modes: ["write"], label: lab, answer: it.ans, check: t => t === it.ans ? { st: "ok" } : { st: "no", msg: "不󠇡是這個󠇡字" } });
+        const s = slide("", kick(k), el("div", { class: "inst" }, "寫出「」裡注音的國字。"), stem, p); s.reveal = p.reveal; return s; });
+      else if (E.type === "fix") sl = E.items.map(x => { const s = fixSlide(x); const kk = s.querySelector(".kicker"); if (kk) kk.textContent = k; return s; });
+      else if (E.type === "mean") { const box = `<div class="exbox">${E.box.join("<br>")}</div>`;
+        sl = E.items.map((x, n) => { const c = choiceQ(`${box}${n + 1}. ${x.s.replace("代表", '<b class="kw">代表</b>')}`, ["①", "②"], x.ans, `${k}${n + 1}`); const s = slide("", kick(k), sayRow(c), c); s.reveal = c.reveal; return s; }); }
+      else if (E.type === "fillpick") sl = E.items.map((x, n) => fillPickSlide(x, `${k}${n + 1}`, k));
+      else if (E.type === "mc") sl = E.items.map((x, n) => { const c = choiceQ(`${n + 1}. ${x.q.replace(/[「」]　[「」]/, "「　」")}`, x.opts.map(o => x.zyopts ? o.replace(/「(.+?)」/, (m, z) => `「${ZY(z)}」`) : o), x.ans, `${k}${n + 1}`); const s = slide("", kick(k), sayRow(c), c); s.reveal = c.reveal; return s; });
+      else if (E.type === "copy") sl = E.items.map((x, n) => { const w = writeBox(`${k}${n + 1}`); w.querySelector("textarea").placeholder = x.stem;
+        return slide("", kick(k), el("div", { class: "stem big-line" }, `${n + 1}. ${x.orig}`), el("div", { class: "stem big-line" }, `• ${x.stem}`), w, refBox(esc(x.ref))); });
+      else if (E.type === "own") sl = E.items.map((x, n) => { const w = writeBox(`${k}：${x.pat}`);
+        return slide("", kick(k), el("div", { class: "stem big-line" }, `${n + 1}. ${x.pat}`), w, refBox(esc(x.ref))); });
+      return { name: k.replace(/^.、/, ""), slides: sl };
     });
-    if (T === "proj") return deck([{ name: "綜合練習", slides: out }]);
-    return deck([{ name: "綜合練習", hint: "整課重點複習。", slides: out }, { name: "完成", slides: [finishSlide()] }], { submit: true });
+    if (T === "proj") return deck(secs);
+    return deck([...secs, { name: "完成", slides: [finishSlide()] }], { submit: true });
   },
 };
+
+/* 試卷「填入正確的答案」：先按空󠇡格，再按上面的字（或注音）填入 */
+function fillPickSlide(x, label, k) {
+  const q = qid(label); const parts = x.s.split("{}"); const line = el("div", { class: "stem big-line fpline" }); const blanks = []; let cur = 0;
+  const show = t => x.zy ? `<span class="ui zyk">${t}</span>` : nz(t);
+  const nzJi = t => x.zy ? t.replace(/濟[\u{E0100}-\u{E01EF}]?/gu, m => nz(m)) : t;
+  parts.forEach((t, i) => { line.insertAdjacentHTML("beforeend", nzJi(t)); if (i < parts.length - 1) { const b = el("button", { type: "button", class: "fpb" }, "（　）"); b.onclick = () => sel(blanks.indexOf(b)); blanks.push(b); line.append(b); } });
+  const sel = i => { cur = i; blanks.forEach((b, j) => b.classList.toggle("on", j === i)); };
+  const box = el("div", { class: "exbox fpopts" }); x.opts.forEach(o => { const c = el("button", { type: "button", class: "chip" }, show(o)); c.onclick = () => { const b = blanks[cur]; if (!b) return; b.dataset.v = o; b.innerHTML = `（${show(o)}）`; b.classList.remove("no"); const nx = blanks.findIndex(z => !z.dataset.v); sel(nx < 0 ? cur : nx); }; box.append(c); });
+  const res = el("div", { class: "pres", "aria-live": "polite" });
+  const ck = el("button", { type: "button", class: "btn solid" }, "檢查"); ck.onclick = () => { if (blanks.some(b => !b.dataset.v)) { res.innerHTML = '<span class="nomsg">還有空󠇡格沒有填。</span>'; return; }
+    let bad = 0; blanks.forEach((b, i) => { const ok = b.dataset.v === x.ans[i]; b.classList.toggle("no", !ok); b.classList.toggle("ok", ok); if (!ok) bad++; });
+    logAns(q, !bad, blanks.map(b => b.dataset.v).join("、")); res.innerHTML = bad ? `<span class="nomsg">有 ${bad} 個不󠇡對，改改看。</span>` : '<span class="okmsg">√ 全部正確！</span>'; if (!bad) wrap.classList.add("answered"); };
+  sel(0); const wrap = el("div"); wrap.append(box, line, tools(ck), res);
+  const s = slide("", kick(k), el("div", { class: "inst" }, "先按空󠇡格，再按方框裡的答案。"), wrap); s.dataset.nofit = "1";
+  s.reveal = () => blanks.forEach((b, i) => { b.dataset.v = x.ans[i]; b.innerHTML = `（${show(x.ans[i])}）`; }); return s;
+}
 
 /* 部首歸類：按出有這個󠇡部首的字 */
 function radSortSlide(R) {
@@ -2003,17 +2057,18 @@ function radSortSlide(R) {
   return s;
 }
 /* 替換：情況、做什麼兩排詞卡各自打亂，配成合理的一󠇢組 */
-function swapSlide(J, T) {
-  const P = J.s3.pairs; const q = qid("③ 替換：換情況和做什麼"); let selA = null, selB = null, n = 0;
-  const line = el("div", { class: "stem big-line" }); const paint = () => { line.innerHTML = `假如<span class="slot2 b1">${selA === null ? "情況" : P[selA][0]}</span>，我們就<span class="slot2 b3">${selB === null ? "做什麼" : P[selB][1]}</span>。`; };
+function swapSlide(J, T, o = {}) {
+  const O = Object.assign({ pre: "假如", mid: "，我們就", a: "情況", b: "做什麼", title: "③ 替換：換「情況」和「做什麼」" }, o);
+  const P = J.s3.pairs; const q = qid(O.title); let selA = null, selB = null, n = 0;
+  const line = el("div", { class: "stem big-line" }); const paint = () => { line.innerHTML = `${O.pre}<span class="slot2 b1">${selA === null ? O.a : P[selA][0]}</span>${O.mid}<span class="slot2 b3">${selB === null ? O.b : P[selB][1]}</span>。`; };
   const msg = el("div", { class: "segmsg", "aria-live": "polite" }); const got = el("ol", { class: "cgot" });
   const colA = el("div", { class: "ccol" }), colB = el("div", { class: "ccol" });
-  colA.append(el("div", { class: "chead" }, '<span class="blk b1">情況</span>')); colB.append(el("div", { class: "chead" }, '<span class="blk b3">做什麼</span>'));
+  colA.append(el("div", { class: "chead" }, `<span class="blk b1">${O.a}</span>`)); colB.append(el("div", { class: "chead" }, `<span class="blk b3">${O.b}</span>`));
   const bA = shuffle(P.map((x, k) => k)).map(k => { const b = el("button", { type: "button", class: "ccard" }, P[k][0]); b.onclick = () => { bA.forEach(x => x.classList.remove("sel")); b.classList.add("sel"); selA = k; paint(); check(); }; colA.append(b); return b; });
   const bB = shuffle(P.map((x, k) => k)).map(k => { const b = el("button", { type: "button", class: "ccard" }, P[k][1]); b.onclick = () => { bB.forEach(x => x.classList.remove("sel")); b.classList.add("sel"); selB = k; paint(); check(); }; colB.append(b); return b; });
   const used = new Set();
   function check() {
-    if (selA === null || selB === null) return; const s = `假如${P[selA][0]}，我們就${P[selB][1]}。`; const key = selA + "-" + selB;
+    if (selA === null || selB === null) return; const s = `${O.pre}${P[selA][0]}${O.mid}${P[selB][1]}。`; const key = selA + "-" + selB;
     if (used.has(key)) { msg.innerHTML = '<span class="hint">這一󠇡句已經組過了。</span>'; return; }
     if (selA === selB) { used.add(key); n++; if (!proj()) logAns(q, true, s); msg.innerHTML = '<span class="okmsg">√ 通順！</span>'; got.append(el("li", {}, s)); }
     else { msg.innerHTML = '<span class="pendmsg">唸唸看：前後合理嗎？</span>'; const a = el("button", { type: "button", class: "btn only-stu" }, "我覺得󠇡合理，請老師看"); a.onclick = () => { used.add(key); n++; logText(q, `${s}（學生覺得󠇡合理，待老師確認）`); got.append(el("li", { class: "pend" }, s + ' <small>老師會確認</small>')); msg.innerHTML = ""; root.classList.add("pending"); }; msg.append(a); }
@@ -2021,8 +2076,8 @@ function swapSlide(J, T) {
   }
   paint(); const cols = el("div", { class: "ccols" }); cols.append(colA, colB);
   const root = el("div", { class: "combo" }); root.append(line, msg, cols, got);
-  const s = slide("", kick("③ 替換：換「情況」和「做什麼」"), el("div", { class: "hint" }, "左邊選一󠇡個󠇡情況，右邊選一󠇡件事，組成合理的句子󠇡。至少組兩句。"), root);
-  s.reveal = () => { got.innerHTML = ""; P.forEach(p => got.append(el("li", {}, `假如${p[0]}，我們就${p[1]}。`))); };
+  const s = slide("", kick(O.title), el("div", { class: "hint" }, `左邊選一󠇡個󠇡「${O.a}」，右邊選一󠇡個󠇡「${O.b}」，組成合理的句子󠇡。至少組兩句。`), root);
+  s.reveal = () => { got.innerHTML = ""; P.forEach(p => got.append(el("li", {}, `${O.pre}${p[0]}${O.mid}${p[1]}。`))); };
   return s;
 }
 /* 詞卡排句：依序按詞卡排成句子󠇡，也可以用說的 */
@@ -3254,7 +3309,10 @@ async function openWithKey(key) {
   const ids = Object.keys(LESSONS).filter(id => LESSONS[id]);
   if (!ids.length) { const j = await (await fetch(`${LBASE}${LIST[0][0]}/sealed.json`)).json(); await crypto.subtle.decrypt({ name: "AES-GCM", iv: ub(j.i) }, key, ub(j.c)); }
   for (const id of ids) await openLesson(id, key);
-  KEY = key; UNLOCKED = true; paintLockBtn();
+  KEY = key; UNLOCKED = true;
+  /* 驗證鑰匙期間才載入完成的課次（重新整理頁面時常見）也要打開 */
+  for (const id of Object.keys(LESSONS).filter(id => LESSONS[id] && !LESSONS[id]._open)) { try { await openLesson(id, key); } catch (e) {} }
+  paintLockBtn();
   if (page() === "lesson") render();
 }
 function relock() {
